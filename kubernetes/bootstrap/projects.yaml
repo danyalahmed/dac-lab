@@ -6,9 +6,9 @@ metadata:
 spec:
   description: Infrastructure related applications
   destinations:
-  - namespace: 
-    - 'shared-services'
-    - 'argocd'
+  - namespace: 'shared-services'
+    server: 'https://kubernetes.default.svc'
+  - namespace: 'argocd'
     server: 'https://kubernetes.default.svc'
   
   sourceRepos:
