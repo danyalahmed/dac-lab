@@ -1,0 +1,21 @@
+kubernetes_version: "1.35.0"
+kubernetes_version_full: "1.35.0-1.1"
+kubernetes_version_short: "1.35"
+pod_network_cidr: "10.240.0.0/16"
+
+argocd_version: "v3.2.3"
+calico_version: "v3.31.3"
+kubelet_csr_approver_version: "1.2.12"
+
+local_path_provisioner_dir: "/var/lib/local-path-provisioner"
+
+git_repo_url: "https://github.com/danyalahmed/dac-lab.git"
+
+# Vault variables
+kubelet_csr_ip_prefixes: "{{ vault_kubelet_csr_ip_prefixes }}"
+kubelet_csr_regex: "{{ vault_kubelet_csr_regex }}"
+desired_dns_servers: "{{ vault_desired_dns_servers | default('1.1.1.1') }}"
+seaweedfs_admin_access_key: "{{ vault_seaweedfs_admin_access_key }}"
+seaweedfs_admin_secret_key: "{{ vault_seaweedfs_admin_secret_key }}"
+seaweedfs_admin_access_key_dev: "{{ vault_seaweedfs_admin_access_key_dev }}"
+seaweedfs_admin_secret_key_dev: "{{ vault_seaweedfs_admin_secret_key_dev }}"

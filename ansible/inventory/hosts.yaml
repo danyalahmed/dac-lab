@@ -1,0 +1,11 @@
+all:
+  children:
+    k8s_cluster:
+      children:
+        controlplanes:
+          hosts:
+            controlplane-1: # ip comes from private inventory
+        workers:
+          hosts:
+            worker-01: # ip comes from private inventory
+            worker-02: # ip comes from private inventory

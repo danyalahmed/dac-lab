@@ -1,0 +1,23 @@
+- name: Get kubeadm join command
+  ansible.builtin.command: kubeadm token create --print-join-command
+  delegate_to: "{{ groups['controlplanes'][0] }}"
+  register: kubeadm_join_command
+  changed_when: false
+
+- name: Join worker nodes to the Kubernetes cluster
+  ansible.builtin.command: "{{ kubeadm_join_command.stdout }} --v=5 --node-name {{ inventory_hostname }}"
+  args:
+    creates: /etc/kubernetes/kubelet.conf
+
+- name: Apply node labels
+  ansible.builtin.command:
+    cmd: >-
+      kubectl label node {{ item }}
+      {% for k, v in hostvars[item].node_labels.items() %}{{ k }}={{ v }} {% endfor %}
+      --overwrite
+  loop: "{{ groups['k8s_cluster'] }}"
+  delegate_to: "{{ groups['controlplanes'][0] }}"
+  register: label_cmd
+  changed_when: "'labeled' in label_cmd.stdout and 'not labeled' not in label_cmd.stdout"
+  when: hostvars[item].node_labels is defined
+  become: false

@@ -1,0 +1,3 @@
+is_controlplane: false
+node_labels:
+  node-role.kubernetes.io/worker: worker

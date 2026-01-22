@@ -1,0 +1,137 @@
+- name: Manage Shared Services Namespaces
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: shared-services
+
+- name: Create Seaweed S3 config Secrets
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: seaweedfs-s3-config
+        namespace: shared-services
+      data:
+        # We dynamicallly pick the template based on the environment name
+        s3-config.json: "{{ lookup('template', 'seaweedfs-s3-config.json.j2') | b64encode }}"
+  no_log: true # avoid printing base64 data to console
+
+- name: Create argocd namespace
+  kubernetes.core.k8s:
+    name: argocd
+    kind: Namespace
+    state: present
+    definition:
+      metadata:
+        labels:
+          istio.io/dataplane-mode: ambient
+
+- name: Install ArgoCD Manifests
+  kubernetes.core.k8s:
+    namespace: argocd
+    src: "https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml"
+    state: present
+
+- name: Wait for ArgoCD Server to be ready
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: argocd-server
+    namespace: argocd
+  register: argocd_status
+  until:
+    - argocd_status.resources | length > 0
+    - argocd_status.resources[0].status.readyReplicas is defined
+    - argocd_status.resources[0].status.readyReplicas | int > 0
+  retries: 30
+  delay: 10
+
+- name: Register Private SSH Key for Git Repos
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: dac-lab-repo
+        namespace: argocd
+        labels:
+          argocd.argoproj.io/secret-type: repository
+      stringData:
+        type: git
+        url: "{{ git_repo_url }}"
+  no_log: true
+
+- name: Enable Helm in Kustomize for ArgoCD
+  kubernetes.core.k8s_json_patch:
+    kind: ConfigMap
+    name: argocd-cm
+    namespace: argocd
+    patch:
+      - op: add
+        path: /data/kustomize.buildOptions
+        value: "--enable-helm"
+
+- name: Restart ArgoCD Repo Server to apply changes
+  kubernetes.core.k8s:
+    state: patched
+    kind: Deployment
+    name: argocd-repo-server
+    namespace: argocd
+    definition:
+      spec:
+        template:
+          metadata:
+            annotations:
+              kubectl.kubernetes.io/restartedAt: "{{ ansible_date_time.iso8601 }}"
+
+- name: Disable TLS verification in ArgoCD
+  kubernetes.core.k8s:
+    state: patched
+    kind: ConfigMap
+    name: argocd-cmd-params-cm
+    namespace: argocd
+    definition:
+      data:
+        server.insecure: "true"
+
+- name: Restart ArgoCD Server to apply changes
+  kubernetes.core.k8s:
+    state: patched
+    kind: Deployment
+    name: argocd-server
+    namespace: argocd
+    definition:
+      spec:
+        template:
+          metadata:
+            annotations:
+              kubectl.kubernetes.io/restartedAt: "{{ ansible_date_time.iso8601 }}"
+
+- name: Deploy App of Apps Application
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: root-app
+        namespace: argocd
+      spec:
+        project: default
+        source:
+          repoURL: "{{ git_repo_url }}"
+          targetRevision: HEAD
+          path: kubernetes/bootstrap
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: argocd
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true

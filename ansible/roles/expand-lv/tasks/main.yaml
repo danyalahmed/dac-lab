@@ -1,0 +1,27 @@
+- name: Expand the primary Logical Volume dynamically
+  community.general.lvol:
+    # Safely get the first VG and first LV found on the system
+    vg: "{{ ansible_facts.lvm.vgs.keys() | list | first }}"
+    lv: "{{ (ansible_facts.lvm.lvs.keys() | list | first) }}"
+    size: +100%FREE
+    resizefs: true
+  # Only run if LVM facts exist to avoid crashing on non-LVM nodes
+  when:
+    - ansible_facts.lvm.vgs is defined
+    - ansible_facts.lvm.vgs.keys() | list | length > 0
+
+- name: Verify disk space after expansion
+  ansible.builtin.command:
+    cmd: df -h / --output=size,pcent
+  register: disk_status
+  changed_when: false
+
+- name: Debug disk status
+  ansible.builtin.debug:
+    msg: "Node {{ inventory_hostname }} root partition is now {{ disk_status.stdout_lines[1] }}"
+
+- name: Ensure local path provisioner directory exists
+  ansible.builtin.file:
+    path: "{{ local_path_provisioner_dir }}"
+    state: directory
+    mode: '0755'

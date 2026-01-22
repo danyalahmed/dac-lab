@@ -1,0 +1,3 @@
+is_controlplane: true
+node_labels:
+  node-role.kubernetes.io/control-plane: control-plane

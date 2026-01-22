@@ -1,0 +1,11 @@
+- name: Reboot System
+  ansible.builtin.reboot:
+    msg: "Reboot initiated by Ansible due to system upgrade."
+    pre_reboot_delay: 10
+    post_reboot_delay: 30
+    reboot_timeout: 600
+
+- name: Restart Containerd
+  ansible.builtin.systemd:
+    name: containerd
+    state: restarted

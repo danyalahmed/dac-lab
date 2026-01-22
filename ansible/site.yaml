@@ -1,0 +1,40 @@
+  # Runs on all nodes
+- name: Setup Kubernetes Cluster
+  hosts: k8s_cluster
+  become: true
+  become_method: ansible.builtin.sudo
+  roles:
+    - prerequisites # Install required packages and dependencies, including kubeadm, kubelet, kubectl & containerd
+    - firewall
+
+  # Runs only on control plane nodes to setup the cluster
+  # as there is just one control plane in this setup, this will run only once
+- name: Setup Kubernetes Control Plane
+  hosts: controlplanes
+  become: true
+  become_method: ansible.builtin.sudo
+  roles:
+    - k8s-setup
+
+- name: Join Kubernetes Workers to the Cluster
+  hosts: k8s_cluster
+  become: true
+  become_method: ansible.builtin.sudo
+  roles:
+    - k8s-join-workers
+
+  # Runs only on worker nodes to expand the logical volume
+  # ubuntu default installation creates a small root LV, so we need to expand it
+- name: Expand Logical Volume on workers nodes
+  hosts: workers
+  become: true
+  become_method: ansible.builtin.sudo
+  roles:
+    - expand-lv
+
+- name: Bootstrap Day 0 Applications
+  hosts: controlplanes
+  become: false
+  become_method: ansible.builtin.sudo
+  roles:
+    - k8s-bootstrap-apps

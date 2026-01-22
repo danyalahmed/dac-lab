@@ -1,0 +1,207 @@
+---
+- name: Check if Kubernetes is already installed
+  ansible.builtin.stat:
+    path: /etc/kubernetes/.bootstrapped
+  register: k8s_bootstrapped
+
+- name: Set Kubernetes installation fact
+  ansible.builtin.set_fact:
+    is_k8s_bootstrapped: "{{ k8s_bootstrapped.stat.exists }}"
+
+- name: Create Kubeadm configuration file
+  ansible.builtin.template:
+    src: kubeadm-config.yaml.j2
+    dest: /tmp/kubeadm-config.yaml
+    mode: '0600'
+  when: not is_k8s_bootstrapped
+
+- name: Initialize Kubernetes Control Plane
+  ansible.builtin.command:
+    cmd: kubeadm init --config=/tmp/kubeadm-config.yaml --v=5
+  args:
+    creates: /etc/kubernetes/admin.conf
+  when: not is_k8s_bootstrapped
+  register: kubeadm_init
+  changed_when: "'initialized' in kubeadm_init.stdout"
+
+- name: Wait for API Server to be reachable
+  ansible.builtin.wait_for:
+    host: "{{ ansible_facts['default_ipv4']['address'] }}"
+    port: 6443
+    timeout: 300
+  when: not is_k8s_bootstrapped
+
+- name: Create .kube directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/.kube
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  when: not is_k8s_bootstrapped
+
+- name: Copy admin.conf to user's kube config
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/{{ ansible_user }}/.kube/config
+    mode: '0644'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    remote_src: true
+  when: not is_k8s_bootstrapped
+
+- name: Get CoreDns configmap
+  kubernetes.core.k8s_info:
+    kind: ConfigMap
+    namespace: kube-system
+    name: coredns
+  register: coredns_configmap
+  become: false
+  when: not is_k8s_bootstrapped
+
+- name: Patch CoreDns
+  ansible.builtin.set_fact:
+    coredns_patched: >-
+      {{
+        coredns_configmap.resources[0]
+        | combine({
+            'data': {
+              'Corefile':
+                coredns_configmap.resources[0].data.Corefile
+                | replace(
+                    'forward . /etc/resolv.conf',
+                    'forward . ' ~ desired_dns_servers | join(' ')
+                  )
+            }
+          })
+      }}
+  become: false
+  when: not is_k8s_bootstrapped
+
+- name: Apply patched CoreDns configmap
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ coredns_patched }}"
+  when: not is_k8s_bootstrapped and coredns_configmap.resources[0].data.Corefile != coredns_patched.data.Corefile
+  become: false
+
+- name: Restart CoreDns Deployment
+  kubernetes.core.k8s:
+    state: present
+    kind: Deployment
+    namespace: kube-system
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: coredns
+      spec:
+        template:
+          metadata:
+            annotations:
+              kubectl.kubernetes.io/restartedAt: "{{ ansible_date_time.iso8601 }}"
+  when: not is_k8s_bootstrapped and coredns_configmap.resources[0].data.Corefile != coredns_patched.data.Corefile
+  become: false
+
+  # --- ONE-TIME MANUAL APPROVAL ---
+  # This breaks the "identity loop" so the Kubelet can start the network
+- name: Initial manual approval of Kubelet CSRs
+  ansible.builtin.shell: |
+    # We allow grep to fail (exit 1) if no Pending CSRs exist
+    set -o pipefail
+    kubectl get csr --no-headers | grep 'Pending' || exit 0 | awk '{print $1}' | xargs -r kubectl certificate approve
+  register: manual_csr_result
+  delegate_to: "{{ groups['controlplanes'][0] }}"
+  # Success is now defined by the command finishing, regardless of findings
+  until: manual_csr_result.rc == 0
+  retries: 10
+  delay: 15
+  when: not is_k8s_bootstrapped and not csr_approver_installed | default(false)
+  # Task only shows "changed" if the output actually contains an approval message
+  changed_when: "'approved' in manual_csr_result.stdout"
+  become: false
+
+- name: Install Calico Network Plugin with Tigera Operator
+  kubernetes.core.k8s:
+    state: present
+    src: https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml
+  when: not is_k8s_bootstrapped
+  become: false
+
+- name: Wait for Calico Operator to be ready
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: tigera-operator
+    name: tigera-operator
+  register: calico_operator_deployment
+  until: calico_operator_deployment.resources[0].status.availableReplicas | default(0) | int >= 1
+  retries: 20
+  delay: 15
+  when: not is_k8s_bootstrapped
+  become: false
+
+- name: Get Calico Custom Resources Manifests
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/custom-resources.yaml
+    dest: /tmp/calico-custom-resources.yaml
+    mode: '0644'
+  when: not is_k8s_bootstrapped
+
+- name: Patch Calico Custom Resources
+  ansible.builtin.replace:
+    path: /tmp/calico-custom-resources.yaml
+    regexp: '192\.168\.0\.0/16'
+    replace: '{{ pod_network_cidr }}'
+  when: not is_k8s_bootstrapped
+
+- name: Apply Calico Custom Resources
+  kubernetes.core.k8s:
+    state: present
+    src: /tmp/calico-custom-resources.yaml
+  when: not is_k8s_bootstrapped
+  become: false
+  register: calico_cr
+  until: calico_cr is succeeded
+  retries: 10
+  delay: 5
+
+- name: Mark Kubernetes Bootstrap as Completed
+  ansible.builtin.file:
+    path: /etc/kubernetes/.bootstrapped
+    state: touch
+    mode: '0600'
+  when: not is_k8s_bootstrapped
+
+- name: Copy kubeconfig to local machine
+  ansible.builtin.fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/new_config # avoid overwriting existing config
+    flat: true
+
+  # running helm commands on local machine
+- name: Add Kubelet CSR Approver helm chart repository
+  kubernetes.core.helm_repository:
+    name: kubelet-csr-approver
+    repo_url: https://postfinance.github.io/kubelet-csr-approver
+  when: not csr_approver_installed | default(false)
+  delegate_to: localhost
+  become: false
+
+- name: Install Kubelet CSR Approver via Helm
+  kubernetes.core.helm:
+    name: kubelet-csr-approver
+    chart_ref: kubelet-csr-approver/kubelet-csr-approver
+    chart_version: "{{ kubelet_csr_approver_version }}"
+    namespace: kube-system
+    kubeconfig: ~/.kube/new_config
+    values:
+      providerRegex: "{{ kubelet_csr_regex }}"
+      providerIpPrefixes: "{{ kubelet_csr_ip_prefixes }}"
+      maxExpirationSeconds: 86400
+      bypassDnsResolution: true
+  delegate_to: localhost
+  become: false
+
+- name: Set csr_approver_installed fact
+  ansible.builtin.set_fact:
+    csr_approver_installed: true
