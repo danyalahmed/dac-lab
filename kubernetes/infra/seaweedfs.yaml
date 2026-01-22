@@ -1,3 +1,27 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: seaweedfs-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://seaweedfs.github.io/seaweedfs-operator
+    chart: seaweedfs-operator
+    targetRevision: 0.1.12
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shared-services
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
 # apiVersion: argoproj.io/v1alpha1
 # kind: Application
 # metadata:
@@ -21,10 +45,11 @@
 #       selfHeal: true
 
 # secondary instance used only for PG backups (breakglass)
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: seaweedfs-secondary
+  name: seaweedfs-cluster-secondary
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
