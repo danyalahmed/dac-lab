@@ -6,11 +6,11 @@ metadata:
 spec:
   description: Infrastructure related applications
   destinations:
-    - namespace: 'shared-services'
-      server: 'https://kubernetes.default.svc'
+  - namespace: 'shared-services'
+    server: 'https://kubernetes.default.svc'
   
   sourceRepos:
-    - '*'
+  - '*'
 
   clusterResourceWhitelist:
   - group: "*"

@@ -126,7 +126,7 @@
         project: default
         source:
           repoURL: "{{ git_repo_url }}"
-          targetRevision: HEAD
+          targetRevision: main
           path: kubernetes/bootstrap
         destination:
           server: https://kubernetes.default.svc
