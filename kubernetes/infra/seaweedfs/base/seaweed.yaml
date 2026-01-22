@@ -1,5 +1,5 @@
 apiVersion: seaweed.seaweedfs.com/v1
-kind: Seaweed
+kind: SeaweedFS
 metadata:
   name: seaweedfs-cluster
   namespace: shared-services

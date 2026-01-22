@@ -1,6 +1,0 @@
-- op: replace
-  path: /spec/volume/storageClassName
-  value: nfs-client
-- op: replace
-  path: /spec/filer/storageClassName
-  value: nfs-client

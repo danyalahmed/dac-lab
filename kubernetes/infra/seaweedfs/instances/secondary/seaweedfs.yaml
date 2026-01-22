@@ -1,0 +1,22 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: SeaweedFS
+metadata:
+  name: seaweedfs-cluster # Kustomize matches this to the base name
+  namespace: shared-services
+spec:
+  # CHANGE 1: Use NFS instead of Local-Path (NVMe)
+  volume:
+    storageClassName: "nfs-client"
+    size: 100Gi
+
+  # CHANGE 2: Force the Filer to use LevelDB on NFS instead of Postgres
+  filer:
+    storageClassName: "nfs-client"
+    config: |
+      [leveldb2]
+      enabled = true
+      dir = "/data/filerdb2"
+
+  # CHANGE 3: Ensure Master also uses NFS for cluster logs
+  master:
+    storageClassName: "nfs-client"
