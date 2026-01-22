@@ -5,6 +5,7 @@ nameSuffix: -secondary
 
 resources:
   - ../../base
+  - master-pvc.yaml
 
 patches:
   - path: seaweedfs.yaml

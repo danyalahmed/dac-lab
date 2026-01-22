@@ -1,5 +1,5 @@
 apiVersion: seaweed.seaweedfs.com/v1
-kind: SeaweedFS
+kind: Seaweed
 metadata:
   name: seaweedfs-cluster
   namespace: shared-services
@@ -8,25 +8,26 @@ spec:
   master:
     volumeSizeLimitMB: 1024
     nodeSelector:
-      schedule-seaweedfs: true
+      schedule-seaweedfs: "True"
     replicas: 1
-    requests:
-      storage: 5Gi
-    storageClassName: local-path
   volume:
     nodeSelector:
-      schedule-seaweedfs: true
+      schedule-seaweedfs: "True"
     replicas: 1
     requests:
       storage: 100Gi
     storageClassName: nfs-client
   filer:
     nodeSelector:
-      schedule-seaweedfs: true
+      schedule-seaweedfs: "True"
     replicas: 1
-    requests:
-      storage: 5Gi
-    storageClassName: local-path
+    persistence:
+      enabled: true
+      storageClassName: "nfs-client"
+      mountPath: /data
+      resources:
+        requests:
+          storage: 5Gi
     s3:
       enabled: true
       configSecret:
