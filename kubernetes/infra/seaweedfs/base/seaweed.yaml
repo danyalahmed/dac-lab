@@ -1,0 +1,38 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Seaweed
+metadata:
+  name: seaweedfs-cluster
+  namespace: shared-services
+spec:
+  image: chrislusf/seaweedfs:4.06
+  master:
+    volumeSizeLimitMB: 1024
+    nodeSelector:
+      schedule-seaweedfs: true
+    replicas: 1
+    requests:
+      storage: 5Gi
+    storageClassName: local-path
+  volume:
+    nodeSelector:
+      schedule-seaweedfs: true
+    replicas: 1
+    requests:
+      storage: 100Gi
+    storageClassName: nfs-client
+  filer:
+    nodeSelector:
+      schedule-seaweedfs: true
+    replicas: 1
+    requests:
+      storage: 5Gi
+    storageClassName: local-path
+    s3:
+      enabled: true
+      configSecret:
+        name: seaweedfs-s3-config
+        key: s3-config.json
+    config: |
+      [leveldb2]
+      enabled = true
+      dir = "/data/filerldb2"
