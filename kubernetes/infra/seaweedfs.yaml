@@ -11,7 +11,7 @@
 #     repoURL: https://github.com/danyalahmed/dac-lab.git
 #     path: kubernetes/infra/seaweedfs
 
-#   destinations:
+#   destination:
 #     server: https://kubernetes.default.svc
 #     namespace: shared-services
 
@@ -34,7 +34,7 @@ spec:
     repoURL: https://github.com/danyalahmed/dac-lab.git
     path: kubernetes/infra/seaweedfs/instances/secondary
 
-  destinations:
+  destination:
     server: https://kubernetes.default.svc
     namespace: shared-services
 
