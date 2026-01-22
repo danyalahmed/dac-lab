@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/danyalahmed/dac-lab.git
     path: kubernetes/infra
-  destinations:
+  destination:
     server: https://kubernetes.default.svc
     namespace: shared-services
   syncPolicy:
