@@ -1,0 +1,94 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nfs-provisioner
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+    chart: nfs-subdir-external-provisioner
+    targetRevision: 4.0.18
+    helm:
+      values: |
+        nfs:
+          server: "nfs-server.local" # it is resolvable from nodes
+          path: /mnt/nfs-share/kubernetes
+        storageClass:
+          name: nfs-client
+          pathPattern: "${.PVC.namespace}/${.PVC.name}"
+          reclaimPolicy: Retain
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shared-services
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: local-path-provisioner
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://github.com/rancher/local-path-provisioner.git
+    targetRevision: v0.0.34
+    path: deploy/chart/local-path-provisioner
+    helm:
+      values: |
+        storageClass:
+          defaultClass: true
+          reclaimPolicy: Retain
+          name: local-path
+        nodePathMap:
+          - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+            paths:
+              - /var/lib/kubernetes/local-path-provisioner
+        configmap:
+          # This overrides the default 'setup' script in the ConfigMap
+          setup: |-
+            #!/bin/sh
+            while getopts "m:s:p:" opt; do
+              case $opt in
+                p) absolutePath=$OPTARG ;;
+                s) sizeInBytes=$OPTARG ;;
+                m) volMode=$OPTARG ;;
+              esac
+            done
+            # Your custom namespace/name logic
+            mkdir -m 0777 -p "${absolutePath}/${PVC_NAMESPACE}/${PVC_NAME}"
+
+          # This overrides the default 'teardown' script
+          teardown: |-
+            #!/bin/sh
+            while getopts "m:s:p:" opt; do
+              case $opt in
+                p) absolutePath=$OPTARG ;;
+                s) sizeInBytes=$OPTARG ;;
+                m) volMode=$OPTARG ;;
+              esac
+            done
+            # Homelab safety: comment out the 'rm' or leave as exit 0
+            # rm -rf "${absolutePath}/${PVC_NAMESPACE}/${PVC_NAME}"
+            exit 0
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shared-services
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
