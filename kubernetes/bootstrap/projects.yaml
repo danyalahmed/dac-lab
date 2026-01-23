@@ -6,7 +6,15 @@ metadata:
 spec:
   description: Infrastructure related applications
   destinations:
-  - namespace: '*'
+  - namespace: 'shared-services'
+    server: 'https://kubernetes.default.svc'
+  - namespace: 'argocd'
+    server: 'https://kubernetes.default.svc'
+  - namespace: 'istio-system'
+    server: 'https://kubernetes.default.svc'
+  - namespace: 'gateway-system'
+    server: 'https://kubernetes.default.svc'
+  - namespace: 'kube-system'
     server: 'https://kubernetes.default.svc'
   sourceRepos:
   - https://github.com/danyalahmed/dac-lab
