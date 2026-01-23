@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kiali-httproute
+  namespace: kiali
+spec:
+  parentRefs:
+    - name: main
+      namespace: gateway-system
+      sectionName: https
+  hostnames: 
+    - "kiali.technologylab.uk"
+  rules:
+    - backendRefs:
+        - name: kiali-server
+          port: 80
