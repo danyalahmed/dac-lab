@@ -1,8 +1,16 @@
+# Gateway namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-system
+  lalbels:
+    istio.io/dataplane-mode: ambient
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: secure-gw
-  namespace: istio-system
+  name: main
+  namespace: gateway-system
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
