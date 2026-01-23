@@ -15,7 +15,7 @@ spec:
       values: |
         nfs:
           server: "nfs-server.local" # it is resolvable from nodes
-          path: /mnt/nfs-data
+          path: /mnt/nfs-share/kubernetes
         storageClass:
           name: nfs-client
           pathPattern: "${.PVC.namespace}/${.PVC.name}"
