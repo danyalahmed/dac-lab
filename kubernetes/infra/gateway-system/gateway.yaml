@@ -3,6 +3,8 @@ kind: Gateway
 metadata:
   name: secure-gw
   namespace: istio-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   gatewayClassName: istio
   listeners:
