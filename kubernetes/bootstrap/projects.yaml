@@ -13,3 +13,19 @@ spec:
   clusterResourceWhitelist:
   - group: "*"
     kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: homeautomation
+  namespace: argocd
+spec:
+  description: homeautomation related applications
+  destinations:
+  - namespace: "*"
+    server: 'https://kubernetes.default.svc'
+  sourceRepos:
+  - "*"
+  clusterResourceWhitelist:
+  - group: "*"
+    kind: "*"
