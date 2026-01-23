@@ -14,7 +14,7 @@ spec:
     helm:
       values: |
         nfs:
-          server: "nfs-server.shared-services.svc.cluster.local"
+          server: "nfs-server.local" # it is resolvable from nodes
           path: /mnt/nfs-data
         storageClass:
           name: nfs-client
