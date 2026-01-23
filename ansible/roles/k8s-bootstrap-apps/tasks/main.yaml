@@ -17,12 +17,16 @@
       kind: Secret
       type: Opaque
       metadata:
-        name: seaweedfs-s3-config
+        name: "{{ item.name }}"
         namespace: shared-services
       data:
-        # We dynamicallly pick the template based on the environment name
-        s3-config.json: "{{ lookup('template', 'seaweedfs-s3-config.json.j2') | b64encode }}"
-  no_log: true # avoid printing base64 data to console
+        s3-config.json: "{{ lookup('template', item.template) | b64encode }}"
+  loop:
+    - name: seaweedfs-s3-config
+      template: seaweedfs-s3-config.json.j2
+    - name: seaweedfs-s3-secondary-config
+      template: seaweedfs-s3-secondary-config.json.j2
+  no_log: true
 
 - name: Create argocd namespace
   kubernetes.core.k8s:

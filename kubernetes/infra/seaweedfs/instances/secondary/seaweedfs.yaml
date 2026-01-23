@@ -19,6 +19,11 @@ spec:
       resources:
         requests:
           storage: 5Gi
+    s3:
+      enabled: true
+      configSecret:
+        name: seaweedfs-s3-secondary-config
+        key: s3-config.json
     config: |
       [leveldb2]
       enabled = true
