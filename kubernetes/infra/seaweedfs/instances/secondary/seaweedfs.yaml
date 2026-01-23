@@ -5,7 +5,15 @@ metadata:
   namespace: shared-services
 spec:
   # CHANGE 2: Force the Filer to use LevelDB on NFS instead of Postgres
+  volume:
+    annotations:
+      istio.io/dataplane-mode: none
+  master:
+    annotations:
+      istio.io/dataplane-mode: none
   filer:
+    annotations:
+      istio.io/dataplane-mode: none
     persistence:
       storageClassName: "nfs-client"
       resources:
