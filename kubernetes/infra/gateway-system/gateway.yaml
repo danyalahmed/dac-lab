@@ -1,11 +1,3 @@
-# Gateway namespace
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: gateway-system
-  labels:
-    istio.io/dataplane-mode: ambient
----
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
