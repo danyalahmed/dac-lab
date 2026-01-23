@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: infrastructure
+  sources:
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: v1.19.2
+      helm:
+        values: |
+          crds:
+            enabled: true
+    - repoURL: git@github.com:danyalahmed/dac-lab-private.git
+      path: kubernetes/infra/cert-manager
+      targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shared-services
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
