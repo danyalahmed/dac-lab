@@ -64,7 +64,7 @@ spec:
   project: infrastructure
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: istio-cni
+    chart: cni
     targetRevision: 1.28.3
     helm:
       values: |
@@ -90,7 +90,7 @@ spec:
   project: infrastructure
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: istio-ztunnel
+    chart: ztunnel
     targetRevision: 1.28.3
   destination:
     server: https://kubernetes.default.svc
