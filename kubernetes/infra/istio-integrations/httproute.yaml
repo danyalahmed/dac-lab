@@ -12,5 +12,5 @@ spec:
     - "kiali.technologylab.uk"
   rules:
     - backendRefs:
-        - name: kiali-server
-          port: 80
+        - name: kiali
+          port: 20001
