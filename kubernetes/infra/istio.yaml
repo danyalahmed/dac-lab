@@ -45,6 +45,9 @@ spec:
             PILOT_ENABLE_AMBIENT_MODE: "true"
           cni:
             enabled: true
+        meshConfig:
+          accessLogFile: /dev/stdout
+          accessLogEncoding: JSON
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
