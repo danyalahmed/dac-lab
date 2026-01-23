@@ -12,7 +12,7 @@ spec:
     chart: nfs-subdir-external-provisioner
     targetRevision: 4.0.18
     helm:
-      values:
+      values: |
         nfs:
           server: "nfs-server.shared-services.svc.cluster.local"
           path: /mnt/nfs-data
