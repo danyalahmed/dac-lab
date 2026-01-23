@@ -10,6 +10,7 @@ kubelet_csr_approver_version: "1.2.12"
 local_path_provisioner_dir: "/var/lib/local-path-provisioner"
 
 git_repo_url: "https://github.com/danyalahmed/dac-lab.git"
+git_private_repo_url: "git@github.com:danyalahmed/dac-lab-private.git"
 
 # Vault variables
 kubelet_csr_ip_prefixes: "{{ vault_kubelet_csr_ip_prefixes }}"
