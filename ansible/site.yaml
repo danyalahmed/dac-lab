@@ -38,3 +38,10 @@
   become_method: ansible.builtin.sudo
   roles:
     - k8s-bootstrap-apps
+
+- name: Final touches
+  hosts: workers
+  become: true
+  become_method: ansible.builtin.sudo
+  roles:
+    - final-touches

@@ -6,6 +6,8 @@
       kind: Namespace
       metadata:
         name: shared-services
+        labels:
+          istio.io/dataplane-mode: ambient
 
 - name: Create Seaweed S3 config Secrets
   kubernetes.core.k8s:
