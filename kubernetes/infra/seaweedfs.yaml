@@ -22,27 +22,28 @@ spec:
       prune: true
       selfHeal: true
 ---
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: seaweedfs
-#   namespace: argocd
-#   annotations:
-#     argocd.argoproj.io/sync-wave: "2"
-# spec:
-#   project: infrastructure
-#   source:
-#     repoURL: https://github.com/danyalahmed/dac-lab.git
-#     path: kubernetes/infra/seaweedfs
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: seaweedfs-primary
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: infrastructure
+  source:
+    repoURL: git@github.com:danyalahmed/dac-lab-private.git
+    path: kubernetes/infra/seaweedfs-primary
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shared-services
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
 
-#   destination:
-#     server: https://kubernetes.default.svc
-#     namespace: shared-services
-
-#   syncPolicy:
-#     automated:
-#       prune: true
-#       selfHeal: true
 
 # secondary instance used only for PG backups (breakglass)
 ---
@@ -52,7 +53,7 @@ metadata:
   name: seaweedfs-cluster-secondary
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   project: infrastructure
   source:
