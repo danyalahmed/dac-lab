@@ -4,16 +4,16 @@ metadata:
   name: gateway-api
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: infrastructure
   source:
     repoURL: https://github.com/danyalahmed/dac-lab.git
-    path: kubernetes/infra/gateway-system
+    path: kubernetes/infra/gateway
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc
-    namespace: gateway-system
+    namespace: istio-system
   syncPolicy:
     automated:
       prune: true
