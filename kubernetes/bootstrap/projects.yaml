@@ -3,29 +3,51 @@ kind: AppProject
 metadata:
   name: infrastructure
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   description: Infrastructure related applications
   destinations:
-  - namespace: "*"
-    server: 'https://kubernetes.default.svc'
+    - namespace: "*"
+      server: "https://kubernetes.default.svc"
   sourceRepos:
-  - "*"
+    - "*"
   clusterResourceWhitelist:
-  - group: "*"
-    kind: "*"
+    - group: "*"
+      kind: "*"
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: homeautomation
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   description: homeautomation related applications
   destinations:
-  - namespace: "*"
-    server: 'https://kubernetes.default.svc'
+    - namespace: "*"
+      server: "https://kubernetes.default.svc"
   sourceRepos:
-  - "*"
+    - "*"
   clusterResourceWhitelist:
-  - group: "*"
-    kind: "*"
+    - group: "*"
+      kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: security
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  description: Security and secrets management applications
+  destinations:
+    - namespace: "*"
+      server: "https://kubernetes.default.svc"
+  sourceRepos:
+    - "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
