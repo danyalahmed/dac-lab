@@ -57,6 +57,14 @@ apps:
     version: 0.27.0
     namespace: shared-services
     serversideApply: true
+  - name: barman-plugin
+    wave: 2
+    project: infrastructure
+    type: helm
+    repo: https://cloudnative-pg.io/charts
+    chart: plugin-barman-cloud
+    version: 0.4.0
+    namespace: shared-services
 
 ### SeaweedFS
   - name: seaweedfs-operator
