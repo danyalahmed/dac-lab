@@ -6,7 +6,7 @@ metadata:
 spec:
   image: chrislusf/seaweedfs:4.06
   master:
-    replicas: 2
+    replicas: 1
     volumeSizeLimitMB: 1024
     resources:
       requests:
