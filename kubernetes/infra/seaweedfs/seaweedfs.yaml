@@ -34,7 +34,7 @@ spec:
       - name: WEED_FILER_POSTGRES_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: seaweedfs-postgres-credentials
+            name: seaweedfs-pg-credentials
             key: POSTGRES_PASSWORD
     replicas: 2
     persistence:
