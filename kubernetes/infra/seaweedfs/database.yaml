@@ -9,6 +9,14 @@ spec:
     parameters:
       max_connections: "200"
       shared_buffers: "256MB"
+  
+  bootstrap:
+    initdb:
+      database: seaweedfs
+      owner: seaweedfs
+      secret:
+        name: seaweedfs-pg-credentials
+
   resources:
     requests:
       memory: "512Mi"

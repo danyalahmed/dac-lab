@@ -29,12 +29,13 @@
     definition:
       apiVersion: v1
       kind: Secret
-      type: Opaque
+      type: kubernetes.io/basic-auth
       metadata:
         name: seaweedfs-pg-credentials
         namespace: shared-services
-      stringData:
-        POSTGRES_PASSWORD: "{{ seaweedfs_postgres_password }}"
+      data:
+        username: "{{ 'seaweedfs' | b64encode }}"
+        password: "{{ seaweedfs_postgres_password | b64encode }}"
   no_log: true
 
 - name: Create argocd namespace
