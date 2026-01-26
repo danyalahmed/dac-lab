@@ -53,3 +53,19 @@ spec:
           ref: values
         {{- end }}
       {{- end }}
+      {{- if eq .type "helmFromGit" }}
+      sources:
+        - repoURL: '{{.repo}}'
+          targetRevision: '{{.version}}'
+          path: '{{.location}}'
+          {{- if .hasOverride }}
+          helm:
+            valueFiles:
+              - '$values/kubernetes/infra/{{.name}}/values.yaml'
+          {{- end }}
+        {{- if .hasOverride }}
+        - repoURL: '{{.overridesRepo}}'
+          targetRevision: HEAD
+          ref: values
+        {{- end }}
+      {{- end }}

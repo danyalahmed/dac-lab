@@ -11,8 +11,9 @@ apps:
   - name: local-path-provisioner
     wave: -1
     project: infrastructure
-    type: helm
+    type: helmFromGit
     repo: https://github.com/rancher/local-path-provisioner.git
+    location: deploy/chart/local-path-provisioner
     chart: local-path-provisioner
     version: v0.0.34
     hasOverride: true
