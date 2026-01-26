@@ -17,15 +17,24 @@
       kind: Secret
       type: Opaque
       metadata:
-        name: "{{ item.name }}"
+        name: seaweedfs-s3-config
         namespace: shared-services
       data:
-        s3-config.json: "{{ lookup('template', item.template) | b64encode }}"
-  loop:
-    - name: seaweedfs-s3-config
-      template: seaweedfs-s3-config.json.j2
-    - name: seaweedfs-s3-secondary-config
-      template: seaweedfs-s3-secondary-config.json.j2
+        s3-config.json: "{{ lookup('template', 'seaweedfs-s3-config.json.j2') | b64encode }}"
+  no_log: true
+
+- name: Create Seaweed Postgres credentials Secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: seaweedfs-pg-credentials
+        namespace: shared-services
+      stringData:
+        POSTGRES_PASSWORD: "{{ seaweedfs_postgres_password }}"
   no_log: true
 
 - name: Create argocd namespace

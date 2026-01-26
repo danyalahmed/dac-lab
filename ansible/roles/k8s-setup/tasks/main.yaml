@@ -70,7 +70,7 @@
                 coredns_configmap.resources[0].data.Corefile
                 | replace(
                     'forward . /etc/resolv.conf',
-                    'forward . ' ~ desired_dns_servers | join(' ')
+                    'forward . ' ~ (desired_dns_servers | join(' '))
                   )
             }
           })
