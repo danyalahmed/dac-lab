@@ -31,11 +31,23 @@ spec:
 
   filer:
     env:
+      - name: WEED_FILER_POSTGRES_ENABLED
+        value: "true"
+      - name: WEED_FILER_POSTGRES_HOSTNAME
+        value: "seaweedfs-metadata-rw.shared-services.svc"
+      - name: WEED_FILER_POSTGRES_PORT
+        value: "5432"
+      - name: WEED_FILER_POSTGRES_DATABASE
+        value: "seaweedfs"
+      - name: WEED_FILER_POSTGRES_USERNAME
+        value: "seaweedfs"
       - name: WEED_FILER_POSTGRES_PASSWORD
         valueFrom:
           secretKeyRef:
             name: seaweedfs-pg-credentials
             key: POSTGRES_PASSWORD
+      - name: WEED_FILER_POSTGRES_CREATETABLE
+        value: "true"
     replicas: 2
     persistence:
       enabled: true
