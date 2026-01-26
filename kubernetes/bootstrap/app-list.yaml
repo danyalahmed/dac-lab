@@ -75,3 +75,13 @@ apps:
     chart: seaweedfs-operator
     version: 0.1.12
     namespace: shared-services
+    
+
+  - name: seaweedfs-cluster
+    wave: 3
+    project: infrastructure
+    type: git
+    repo: https://github.com/danyalahmed/dac-lab.git
+    location: kubernetes/infra/seaweedfs
+    targetRevision: main
+
