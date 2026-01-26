@@ -1,0 +1,19 @@
+apiVersion: barman-cloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: seaweedfs-backup-store
+  namespace: shared-services
+spec:
+  configuration:
+    destinationPath: seaweedfs-database-backups
+    endpointURL: http://seaweedfs-filer.shared-services.svc:8333
+    s3Credentials:
+      accessKeyId:
+        name: seaweedfs-s3-credentials
+        key: accessKeyId
+      secretAccessKey:
+        name: seaweedfs-s3-credentials
+        key: secretAccessKey
+    wal:
+      compression: gzip
+  retentionPolicy: "30d"

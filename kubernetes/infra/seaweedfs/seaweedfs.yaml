@@ -1,0 +1,61 @@
+apiVersion: seaweedfs.com/v1
+kind: Seaweed
+metadata:
+  name: seaweedfs
+  namespace: shared-services
+spec:
+  image: chrislusf/seaweedfs:4.06
+  master:
+    replicas: 2
+    volumeSizeLimitMB: 1024
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+
+  volume:
+    replicas: 2
+    requests:
+      storage: 100Gi
+    storageClass: nfs-client
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "200m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+
+  filer:
+    replicas: 2
+    persistence:
+      enabled: true
+      storageClassName: "nfs-client"
+      mountPath: /data
+      resources:
+        requests:
+          storage: 5Gi
+    s3:
+      enabled: true
+      configSecret:
+        name: seaweedfs-s3-config
+        key: s3-config.json
+    config: |
+      [postgres]
+      enabled = true
+      hostname = seaweedfs-metadata-rw.shared-services.svc
+      port = 5432
+      database = seaweedfs
+      username = seaweedfs
+      password = ${POSTGRES_PASSWORD}
+      createTable = true
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"

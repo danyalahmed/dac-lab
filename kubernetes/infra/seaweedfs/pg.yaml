@@ -1,0 +1,30 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: seaweedfs-metadata
+  namespace: shared-services
+spec:
+  instances: 1
+  postgresql:
+    parameters:
+      max_connections: "200"
+      shared_buffers: "256MB"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  storage:
+    storageClass: nfs-client
+    size: 20Gi
+  walStorage:
+    storageClass: local-path
+    size: 5Gi
+
+  plugins:
+    - name: barman-cloud
+      isWalArchiver: true
+      parameters:
+        barmanObjectName: seaweedfs-backup-store
