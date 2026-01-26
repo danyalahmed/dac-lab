@@ -1,4 +1,4 @@
-apiVersion: barman-cloud.cnpg.io/v1
+apiVersion: barmanCloud.cnpg.io/v1
 kind: ObjectStore
 metadata:
   name: seaweedfs-backup-store
