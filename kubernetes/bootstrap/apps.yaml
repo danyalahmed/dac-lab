@@ -6,11 +6,15 @@ metadata:
 spec:
   goTemplate: true
   generators:
-    - git:
-        repoURL: https://github.com/danyalahmed/dac-lab.git
-        revision: HEAD
-        files:
-          - path: kubernetes/bootstrap/app-list.yaml
+    - matrix:
+        generators:
+        - git:
+            repoURL: https://github.com/danyalahmed/dac-lab.git
+            revision: HEAD
+            files:
+              - path: kubernetes/bootstrap/app-list.yaml
+        - list:
+            elementsYaml: '{{ .apps | toJson }}'
   template:
     metadata:
       name: '{{.name}}' # Note: goTemplate uses dot notation (.name)
@@ -31,13 +35,13 @@ spec:
       sources:
         - repoURL: '{{.repo}}'
           path: '{{.path}}'
-          targetRevision: '{{.version}}'
+          targetRevision: '{{.targetRevision}}'
       {{- end }}
       {{- if eq .type "helm" }}
       sources:
         - repoURL: '{{.repo}}'
           chart: '{{.chart}}'
-          targetRevision: '{{.version}}'
+          version: '{{.version}}'
           {{- if .hasOverride }}
           helm:
             valueFiles:
