@@ -34,7 +34,7 @@ spec:
       {{- if eq .type "git" }}
       sources:
         - repoURL: '{{.repo}}'
-          path: '{{.path}}'
+          path: '{{.location}}'
           targetRevision: '{{.targetRevision}}'
       {{- end }}
       {{- if eq .type "helm" }}
@@ -48,7 +48,7 @@ spec:
               - '$values/kubernetes/infra/{{.name}}/values.yaml'
           {{- end }}
         {{- if .hasOverride }}
-        - repoURL: {{.overridesRepo}}
+        - repoURL: '{{.overridesRepo}}'
           targetRevision: HEAD
           ref: values
         {{- end }}

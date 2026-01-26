@@ -4,7 +4,7 @@ apps:
     project: infrastructure
     type: git
     repo: https://github.com/danyalahmed/dac-lab.git
-    path: kubernetes/infra/namespaces
+    location: kubernetes/infra/namespaces
     namespace: shared-services
     targetRevision: HEAD
 
