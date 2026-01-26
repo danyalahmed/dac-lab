@@ -6,10 +6,11 @@ apps:
     repo: https://github.com/danyalahmed/dac-lab.git
     location: kubernetes/infra/namespaces
     namespace: shared-services
-    targetRevision: HEAD
+    targetRevision: main
 
+### Storage Provisioners
   - name: local-path-provisioner
-    wave: -1
+    wave: 0
     project: infrastructure
     type: helmFromGit
     repo: https://github.com/rancher/local-path-provisioner.git
@@ -18,11 +19,11 @@ apps:
     version: v0.0.34
     hasOverride: true
     overridesRepo: https://github.com/danyalahmed/dac-lab.git
-    targetRevision: HEAD
+    targetRevision: main
     namespace: shared-services
 
   - name: nfs-provisioner
-    wave: -1
+    wave: 0
     project: infrastructure
     type: helm
     repo: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
@@ -30,5 +31,15 @@ apps:
     version: 4.0.18
     hasOverride: true
     overridesRepo: https://github.com/danyalahmed/dac-lab.git
-    targetRevision: HEAD
+    targetRevision: main
+    namespace: shared-services
+
+### SeaweedFS
+  - name: seaweedfs-operator
+    wave: 1
+    project: infrastructure
+    type: helm
+    repo: https://seaweedfs.github.io/seaweedfs-operator
+    chart: seaweedfs-operator
+    version: 0.1.12
     namespace: shared-services
