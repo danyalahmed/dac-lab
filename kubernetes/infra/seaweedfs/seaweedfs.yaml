@@ -30,6 +30,12 @@ spec:
         cpu: "1000m"
 
   filer:
+    env:
+      - name: WEED_FILER_POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: seaweedfs-postgres-credentials
+            key: POSTGRES_PASSWORD
     replicas: 2
     persistence:
       enabled: true
@@ -50,7 +56,6 @@ spec:
       port = 5432
       database = seaweedfs
       username = seaweedfs
-      password = ${POSTGRES_PASSWORD}
       createTable = true
     resources:
       requests:
