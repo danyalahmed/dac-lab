@@ -43,6 +43,7 @@ apps:
     chart: cloudnative-pg
     version: 0.27.0
     namespace: shared-services
+    serversideApply: true
 
 ### SeaweedFS
   - name: seaweedfs-operator
