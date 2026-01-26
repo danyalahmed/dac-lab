@@ -17,5 +17,4 @@ apps:
     version: v0.0.34
     hasOverride: true
     overridesRepo: https://github.com/danyalahmed/dac-lab.git
-    path: kubernetes/infra/local-path-provisioner
     namespace: shared-services

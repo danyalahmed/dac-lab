@@ -1,38 +1,51 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: namespaces
+  name: bootstrap
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
-  project: infrastructure
-  source:
-    repoURL: https://github.com/danyalahmed/dac-lab.git
-    path: kubernetes/infra/namespaces
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: shared-services # Note: ArgoCD applications must target a specific namespace
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-# ---
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: infrastructure
-#   namespace: argocd
-# spec:
-#   project: infrastructure
-#   source:
-#     repoURL: https://github.com/danyalahmed/dac-lab.git
-#     path: kubernetes/infra
-#   destination:
-#     server: https://kubernetes.default.svc
-#     namespace: shared-services
-#   syncPolicy:
-#     automated:
-#       prune: true
-#       selfHeal: true
-
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: https://github.com/danyalahmed/dac-lab.git
+        revision: HEAD
+        files:
+          - path: kubernetes/bootstrap/app-list.yaml
+  template:
+    metadata:
+      name: '{{.name}}' # Note: goTemplate uses dot notation (.name)
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{.wave}}'
+    spec:
+      project: '{{.project}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+  templatePatch: |
+    spec:
+      {{- if eq .type "git" }}
+      sources:
+        - repoURL: '{{.repo}}'
+          path: '{{.path}}'
+          targetRevision: '{{.version}}'
+      {{- end }}
+      {{- if eq .type "helm" }}
+      sources:
+        - repoURL: '{{.repo}}'
+          chart: '{{.chart}}'
+          targetRevision: '{{.version}}'
+          {{- if .hasOverride }}
+          helm:
+            valueFiles:
+              - '$values/kubernetes/infra/{{.name}}/values.yaml'
+          {{- end }}
+        {{- if .hasOverride }}
+        - repoURL: {{.overridesRepo}}
+          targetRevision: HEAD
+          ref: values
+        {{- end }}
+      {{- end }}
