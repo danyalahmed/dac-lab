@@ -1,4 +1,4 @@
-apiVersion: seaweedfs.com/v1
+apiVersion: seaweed.seaweedfs.com/v1
 kind: Seaweed
 metadata:
   name: seaweedfs
