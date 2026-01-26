@@ -1,0 +1,21 @@
+apps:
+  - name: namespaces
+    wave: -1
+    project: infrastructure
+    type: git
+    repo: https://github.com/danyalahmed/dac-lab.git
+    path: kubernetes/infra/namespaces
+    namespace: shared-services
+    version: HEAD
+
+  - name: local-path-provisioner
+    wave: -1
+    project: infrastructure
+    type: helm
+    repo: https://github.com/rancher/local-path-provisioner.git
+    chart: local-path-provisioner
+    version: v0.0.34
+    hasOverride: true
+    overridesRepo: https://github.com/danyalahmed/dac-lab.git
+    path: kubernetes/infra/local-path-provisioner
+    namespace: shared-services
