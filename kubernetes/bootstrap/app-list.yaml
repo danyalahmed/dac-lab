@@ -34,6 +34,19 @@ apps:
     targetRevision: main
     namespace: shared-services
 
+### Cert-Manager
+  - name: cert-manager
+    wave: 0
+    project: infrastructure
+    type: helm
+    repo: https://charts.jetstack.io
+    chart: cert-manager
+    version: v1.19.2
+    hasOverride: true
+    overridesRepo: https://github.com/danyalahmed/dac-lab.git
+    targetRevision: main
+    namespace: shared-services
+
 ### Postgresql (CloudNativePG)
   - name: cloudnative-pg-operator
     wave: 1
