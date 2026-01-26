@@ -41,7 +41,7 @@ spec:
       sources:
         - repoURL: '{{.repo}}'
           chart: '{{.chart}}'
-          version: '{{.version}}'
+          targetRevision: '{{.version}}'
           {{- if .hasOverride }}
           helm:
             valueFiles:
