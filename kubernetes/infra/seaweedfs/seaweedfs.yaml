@@ -48,6 +48,8 @@ spec:
             key: password
       - name: WEED_FILER_POSTGRES_CREATETABLE
         value: "true"
+      - name: WEED_FILER_POSTGRES_SSLMODE
+        value: "disable"
     replicas: 2
     persistence:
       enabled: true
