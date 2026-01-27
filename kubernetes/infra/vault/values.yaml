@@ -38,7 +38,5 @@ server:
         s3_force_path_style = true
         region = "eu-west-2"
       }
-
-      service_registration "kubernetes" {}
 injector:
   enabled: true
