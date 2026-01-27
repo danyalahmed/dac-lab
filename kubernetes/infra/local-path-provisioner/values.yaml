@@ -1,6 +1,5 @@
 storageClass:
   defaultClass: true
-  reclaimPolicy: Retain
   name: local-path
 nodePathMap:
   - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
@@ -33,6 +32,3 @@ configmap:
     # Homelab safety: comment out the 'rm' or leave as exit 0
     # rm -rf "${absolutePath}/${PVC_NAMESPACE}/${PVC_NAME}"
     exit 0
-configData:
-  setup: /etc/config/setup
-  teardown: /etc/config/teardown
