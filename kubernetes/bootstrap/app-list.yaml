@@ -85,3 +85,16 @@ apps:
     location: kubernetes/infra/seaweedfs
     targetRevision: main
 
+### HashiCorp Vault
+  - name: vault
+    wave: 4
+    project: security
+    type: helm
+    repo: https://helm.releases.hashicorp.com
+    chart: vault
+    version: 0.29.1
+    hasOverride: true
+    overridesRepo: https://github.com/danyalahmed/dac-lab.git
+    location: kubernetes/infra/vault
+    targetRevision: main
+    namespace: security
