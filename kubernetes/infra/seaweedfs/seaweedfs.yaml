@@ -56,5 +56,6 @@ spec:
       port = 5432
       database = "seaweedfs"
       username = "seaweedfs"
+      password = "${WEED_FILER_POSTGRES_PASSWORD}"
       createTable = true
       sslmode = "disable"
