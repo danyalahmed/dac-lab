@@ -7,6 +7,7 @@ spec:
   configuration:
     destinationPath: s3://seaweedfs-metadata-backups
     endpointURL: http://seaweedfs-filer.shared-services.svc:8333
+    s3ForcePathStyle: true
     s3Credentials:
       accessKeyId:
         name: seaweedfs-backup-creds
