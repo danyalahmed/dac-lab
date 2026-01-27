@@ -65,7 +65,8 @@ apps:
     hasOverride: true
     overridesRepo: https://github.com/danyalahmed/dac-lab.git
     targetRevision: main
-    namespace: shared-services
+    namespace: cert-manager
+  # gateway and mutual TLS certs
   - name: certs
     wave: 5
     project: infrastructure
@@ -73,7 +74,7 @@ apps:
     repo: git@github.com:danyalahmed/dac-lab-private.git
     location: kubernetes/infra/certs
     targetRevision: main
-    namespace: istio-system
+    namespace: istio-system 
 ### Gateway API
   - name: gateway-api
     wave: 0
