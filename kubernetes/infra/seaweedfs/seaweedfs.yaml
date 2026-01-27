@@ -49,13 +49,3 @@ spec:
       configSecret:
         name: seaweedfs-s3-config
         key: s3-config.json
-    config: |
-      [postgres]
-      enabled = true
-      hostname = "seaweedfs-metadata-rw.shared-services.svc"
-      port = 5432
-      database = "seaweedfs"
-      username = "seaweedfs"
-      password = "${WEED_FILER_POSTGRES_PASSWORD}"
-      createTable = true
-      sslmode = "disable"

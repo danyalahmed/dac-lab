@@ -9,7 +9,13 @@ spec:
     parameters:
       max_connections: "200"
       shared_buffers: "256MB"
-  
+  managed:
+    roles:
+      - name: seaweedfs
+        ensure: present
+        login: true
+        passwordSecret:
+          name: seaweedfs-pg-credentials 
   bootstrap:
     initdb:
       database: seaweedfs
