@@ -9,11 +9,11 @@ spec:
     endpointURL: http://seaweedfs-filer.shared-services.svc:8333
     s3Credentials:
       accessKeyId:
-        name: seaweedfs-s3-credentials
-        key: accessKeyId
+        name: seaweedfs-backup-creds
+        key: ACCESS_KEY_ID
       secretAccessKey:
-        name: seaweedfs-s3-credentials
-        key: secretAccessKey
+        name: seaweedfs-backup-creds
+        key: ACCESS_SECRET_KEY
     wal:
       compression: gzip
   retentionPolicy: "30d"
