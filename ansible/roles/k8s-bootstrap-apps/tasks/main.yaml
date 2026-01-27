@@ -35,7 +35,7 @@
         namespace: shared-services
       data:
         username: "{{ 'seaweedfs' | b64encode }}"
-        password: "{{ seaweedfs_postgres_password | b64encode }}"
+        password: "{{ seaweedfs_postgres_password | trim | b64encode }}"
   no_log: true
 
 - name: Create argocd namespace
