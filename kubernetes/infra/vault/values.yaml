@@ -26,7 +26,7 @@ server:
       }
 
       storage "s3" {
-        endpoint = "http://seaweedfs-s3.shared-services.svc:8333"
+        endpoint = "http://seaweedfs-filer.shared-services.svc:8333"
         bucket = "vault-backend"
         access_key = "vault-access-key"
         secret_key = "vault-secret-key"
