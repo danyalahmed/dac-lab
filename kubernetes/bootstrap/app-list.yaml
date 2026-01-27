@@ -100,7 +100,7 @@ apps:
     targetRevision: main
     namespace: security
   - name: vault-pki-integration
-    wave: 4
+    wave: 5
     project: security
     type: git
     repo: git@github.com:danyalahmed/dac-lab-private.git
