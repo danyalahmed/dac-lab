@@ -204,3 +204,14 @@ apps:
     chart: external-secrets
     version: 0.12.1
     namespace: security
+
+
+### ArgoCD Route
+  - name: argocd-route
+    wave: 11
+    project: infrastructure
+    type: git
+    repo: https://github.com/danyalahmed/dac-lab.git
+    location: kubernetes/infra/argocd-route
+    targetRevision: main
+    namespace: argocd
