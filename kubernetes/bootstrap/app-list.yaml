@@ -215,3 +215,22 @@ apps:
     location: kubernetes/infra/argocd-route
     targetRevision: main
     namespace: argocd
+
+### Nextcloud
+  - name: nextcloud
+    wave: 11
+    project: homeautomation
+    type: git
+    repo: git@github.com:danyalahmed/dac-lab-private.git
+    location: kubernetes/apps/nextcloud
+    targetRevision: main
+    namespace: homeautomation
+### Home Assistant
+  - name: home-assistant
+    wave: 11
+    project: homeautomation
+    type: git
+    repo: git@github.com:danyalahmed/dac-lab-private.git
+    location: kubernetes/apps/homeassistant
+    targetRevision: main
+    namespace: homeautomation

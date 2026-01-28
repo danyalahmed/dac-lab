@@ -6,7 +6,7 @@ metadata:
 spec:
   parentRefs:
     - name: main
-      namespace: gateway-system
+      namespace: istio-system
       sectionName: https
   hostnames: 
     - "kiali.technologylab.uk"
