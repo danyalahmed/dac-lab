@@ -11,6 +11,42 @@
             "actions": [
                 "Admin"
             ]
+        },
+        {
+            "name": "seaweedfs-metadata-backup",
+            "credentials": [
+                {
+                    "accessKey": "pg-backup",
+                    "secretKey": "{{ seaweedfs_metadata_backup_secret_key }}"
+                }
+            ],
+            "actions": [
+                "Read",
+                "Write",
+                "List",
+                "Tagging"
+            ],
+            "buckets": [
+                "seaweedfs-metadata-backups"
+            ]
+        },
+        {
+            "name": "vault",
+            "credentials": [
+                {
+                    "accessKey": "vault",
+                    "secretKey": "{{ seaweedfs_vault_secret_key }}"
+                }
+            ],
+            "actions": [
+                "Read",
+                "Write",
+                "List",
+                "Delete"
+            ],
+            "buckets": [
+                "vault-backend"
+            ]
         }
     ]
 }
