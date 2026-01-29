@@ -18,6 +18,17 @@
       metadata:
         name: istio-system
 
+- name: Create istio-system Namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: security
+        labels:
+          istio.io/dataplane-mode: ambient
+
 - name: Create Cloudflare API Token Secret
   kubernetes.core.k8s:
     state: present
@@ -30,6 +41,20 @@
       type: Opaque
       stringData:
         api-token: "{{ cloudflare_api_token }}"
+
+- name: Create Vault S3 credentials
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: generic
+      metadata:
+        name: vault-s3-credentials
+        namespace: security
+      data:
+        ACCESS_KEY_ID: "{{ 'vault' | b64encode }}"
+        ACCESS_SECRET_KEY: "{{ seaweedfs_vault_secret_key | trim | b64encode }}"
 
 - name: Create Seaweed S3 config Secrets
   kubernetes.core.k8s:
