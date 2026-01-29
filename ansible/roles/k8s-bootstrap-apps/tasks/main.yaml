@@ -85,6 +85,21 @@
         password: "{{ seaweedfs_postgres_password | trim | b64encode }}"
   no_log: true
 
+- name: Create Seaweed Backup credentials Secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: seaweedfs-backup-creds
+        namespace: shared-services
+      data:
+        ACCESS_KEY_ID: "{{ 'pg-backup' | b64encode }}"
+        ACCESS_SECRET_KEY: "{{ seaweedfs_metadata_backup_secret_key | trim | b64encode }}"
+  no_log: true
+
 - name: Create argocd namespace
   kubernetes.core.k8s:
     name: argocd
