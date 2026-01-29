@@ -52,3 +52,4 @@ spec:
     config: |
       [postgres]
       enabled = true
+      createTable = true
