@@ -57,7 +57,6 @@
     name: coredns
   register: coredns_configmap
   become: false
-  when: not is_k8s_bootstrapped
 
 - name: Patch CoreDns
   ansible.builtin.set_fact:
@@ -66,23 +65,18 @@
         coredns_configmap.resources[0]
         | combine({
             'data': {
-              'Corefile':
-                coredns_configmap.resources[0].data.Corefile
-                | replace(
-                    'forward . /etc/resolv.conf',
-                    'forward . ' ~ (desired_dns_servers | join(' '))
-                  )
+              'Corefile': coredns_configmap.resources[0].data.Corefile
+                | regex_replace('forward \. /etc/resolv\.conf', 'forward . ' ~ desired_dns_servers)
             }
-          })
+          }, recursive=True)
       }}
   become: false
-  when: not is_k8s_bootstrapped
 
 - name: Apply patched CoreDns configmap
   kubernetes.core.k8s:
     state: present
     definition: "{{ coredns_patched }}"
-  when: not is_k8s_bootstrapped and coredns_configmap.resources[0].data.Corefile != coredns_patched.data.Corefile
+  when: coredns_configmap.resources[0].data.Corefile != coredns_patched.data.Corefile
   become: false
 
 - name: Restart CoreDns Deployment
@@ -99,8 +93,8 @@
         template:
           metadata:
             annotations:
-              kubectl.kubernetes.io/restartedAt: "{{ ansible_date_time.iso8601 }}"
-  when: not is_k8s_bootstrapped and coredns_configmap.resources[0].data.Corefile != coredns_patched.data.Corefile
+              kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
+  when: coredns_configmap.resources[0].data.Corefile != coredns_patched.data.Corefile
   become: false
 
   # --- ONE-TIME MANUAL APPROVAL ---

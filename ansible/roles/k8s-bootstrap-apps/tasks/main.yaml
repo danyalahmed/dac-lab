@@ -105,16 +105,37 @@
     name: argocd
     kind: Namespace
     state: present
-    definition:
-      metadata:
-        labels:
-          istio.io/dataplane-mode: ambient
 
 - name: Install ArgoCD Manifests
   kubernetes.core.k8s:
     namespace: argocd
     src: "https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml"
     state: present
+
+- name: Configure Wave Delay via ArgoCD ConfigMap
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: argocd-cmd-params-cm
+        namespace: argocd
+      data:
+        controller.sync.wave.delay: "10"
+
+- name: Rollout Restart ArgoCD Application Controller
+  kubernetes.core.k8s:
+    state: patched
+    kind: StatefulSet
+    name: argocd-application-controller
+    namespace: argocd
+    definition:
+      spec:
+        template:
+          metadata:
+            annotations:
+              kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
 
 - name: Wait for ArgoCD Server to be ready
   kubernetes.core.k8s_info:
@@ -166,7 +187,7 @@
         template:
           metadata:
             annotations:
-              kubectl.kubernetes.io/restartedAt: "{{ ansible_date_time.iso8601 }}"
+              kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
 
 - name: Disable TLS verification in ArgoCD
   kubernetes.core.k8s:
@@ -189,7 +210,7 @@
         template:
           metadata:
             annotations:
-              kubectl.kubernetes.io/restartedAt: "{{ ansible_date_time.iso8601 }}"
+              kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
 
 - name: Register private repo with ssh
   kubernetes.core.k8s:
