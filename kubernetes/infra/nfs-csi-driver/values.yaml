@@ -1,0 +1,15 @@
+controller:
+  replicas: 2
+
+externalSnapshotter:
+  enabled: true
+
+storageClasses:
+  - name: nfs-client
+    parameters:
+      server: nfs-server.local
+      share: /mnt/nfs-share/kubernetes
+      subDir: "${pvc.metadata.namespace}/${pvc.metadata.name}"
+    reclaimPolicy: Retain
+    mountOptions:
+      - vers=4.1

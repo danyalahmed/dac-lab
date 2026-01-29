@@ -42,13 +42,13 @@ apps:
     targetRevision: main
     namespace: shared-services
 
-  - name: nfs-provisioner
+  - name: nfs-csi-driver
     wave: 0
     project: infrastructure
     type: helm
-    repo: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-    chart: nfs-subdir-external-provisioner
-    version: 4.0.18
+    repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+    chart: csi-driver-nfs
+    version: 4.12.1
     hasOverride: true
     overridesRepo: https://github.com/danyalahmed/dac-lab.git
     targetRevision: main
@@ -234,3 +234,13 @@ apps:
     location: kubernetes/apps/homeassistant
     targetRevision: main
     namespace: homeautomation
+
+### misc
+  - name: misc
+    wave: 21
+    project: default
+    type: git
+    repo: https://github.com/danyalahmed/dac-lab.git
+    location: kubernetes/infra/misc
+    targetRevision: main
+    namespace: default
