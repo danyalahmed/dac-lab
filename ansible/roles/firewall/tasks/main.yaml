@@ -46,6 +46,7 @@
   loop:
     - { port: '4789', proto: 'udp' }   # VXLAN
     - { port: '5473', proto: 'tcp' }   # Calico Typha
+    - { port: '7443', proto: 'tcp' }   # Calico Felix
     - { port: '179', proto: 'tcp' }    # BGP
     - { port: '15001', proto: 'tcp' }  # Istio Outbound
     - { port: '15006', proto: 'tcp' }  # Istio HBONE tunnel

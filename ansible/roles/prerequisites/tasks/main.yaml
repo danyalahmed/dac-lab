@@ -8,6 +8,7 @@
     upgrade: dist
   register: prerequisites_system_upgrade
   notify: Reboot System
+  run_once: true
 
 - name: Ensure required packages are installed
   ansible.builtin.package:

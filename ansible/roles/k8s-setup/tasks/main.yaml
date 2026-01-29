@@ -125,7 +125,6 @@
   kubernetes.core.k8s:
     state: present
     src: https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml
-  when: not is_k8s_bootstrapped
   become: false
 
 - name: Wait for Calico Operator to be ready
@@ -137,7 +136,6 @@
   until: calico_operator_deployment.resources[0].status.availableReplicas | default(0) | int >= 1
   retries: 20
   delay: 15
-  when: not is_k8s_bootstrapped
   become: false
 
 - name: Get Calico Custom Resources Manifests
@@ -145,20 +143,17 @@
     url: https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/custom-resources.yaml
     dest: /tmp/calico-custom-resources.yaml
     mode: '0644'
-  when: not is_k8s_bootstrapped
 
 - name: Patch Calico Custom Resources
   ansible.builtin.replace:
     path: /tmp/calico-custom-resources.yaml
     regexp: '192\.168\.0\.0/16'
     replace: '{{ pod_network_cidr }}'
-  when: not is_k8s_bootstrapped
 
 - name: Apply Calico Custom Resources
   kubernetes.core.k8s:
     state: present
     src: /tmp/calico-custom-resources.yaml
-  when: not is_k8s_bootstrapped
   become: false
   register: calico_cr
   until: calico_cr is succeeded
