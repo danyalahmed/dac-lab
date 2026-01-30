@@ -1,0 +1,301 @@
+---
+# Troubleshooting playbook - Diagnose cluster issues
+# Usage: ansible-playbook troubleshoot.yaml --tags <issue>
+
+- name: System Health Check
+  hosts: k8s_cluster
+  become: true
+  tags: [always, system]
+  tasks:
+    - name: Check disk space
+      ansible.builtin.command: df -h
+      changed_when: false
+      register: disk_space
+
+    - name: Display disk space
+      ansible.builtin.debug:
+        var: disk_space.stdout_lines
+
+    - name: Check memory usage
+      ansible.builtin.command: free -h
+      changed_when: false
+      register: memory
+
+    - name: Display memory usage
+      ansible.builtin.debug:
+        var: memory.stdout_lines
+
+    - name: Check swap status
+      ansible.builtin.command: swapon --show
+      changed_when: false
+      register: swap_status
+      failed_when: false
+
+    - name: Display swap status
+      ansible.builtin.debug:
+        msg: "{{ swap_status.stdout if swap_status.stdout else 'Swap is disabled (correct for Kubernetes)' }}"
+
+- name: Service Status Check
+  hosts: k8s_cluster
+  become: true
+  tags: [never, services]
+  tasks:
+    - name: Check kubelet status
+      ansible.builtin.systemd:
+        name: kubelet
+      register: kubelet_status
+
+    - name: Display kubelet status
+      ansible.builtin.debug:
+        msg:
+          - "Kubelet is {{ kubelet_status.status.ActiveState }}"
+          - "Enabled: {{ kubelet_status.status.UnitFileState }}"
+
+    - name: Check containerd status
+      ansible.builtin.systemd:
+        name: containerd
+      register: containerd_status
+
+    - name: Display containerd status
+      ansible.builtin.debug:
+        msg:
+          - "Containerd is {{ containerd_status.status.ActiveState }}"
+          - "Enabled: {{ containerd_status.status.UnitFileState }}"
+
+    - name: Get kubelet logs (last 50 lines)
+      ansible.builtin.command: journalctl -u kubelet -n 50 --no-pager
+      changed_when: false
+      register: kubelet_logs
+
+    - name: Display kubelet logs
+      ansible.builtin.debug:
+        var: kubelet_logs.stdout_lines
+
+- name: Network Diagnostics
+  hosts: k8s_cluster
+  become: true
+  tags: [never, network]
+  tasks:
+    - name: Check network interfaces
+      ansible.builtin.command: ip addr show
+      changed_when: false
+      register: interfaces
+
+    - name: Display interfaces
+      ansible.builtin.debug:
+        var: interfaces.stdout_lines
+
+    - name: Check routes
+      ansible.builtin.command: ip route show
+      changed_when: false
+      register: routes
+
+    - name: Display routes
+      ansible.builtin.debug:
+        var: routes.stdout_lines
+
+    - name: Check firewall status
+      ansible.builtin.command: ufw status verbose
+      changed_when: false
+      register: firewall
+
+    - name: Display firewall status
+      ansible.builtin.debug:
+        var: firewall.stdout_lines
+
+    - name: Check for network errors
+      ansible.builtin.command: netstat -i
+      changed_when: false
+      register: netstat
+
+    - name: Display network statistics
+      ansible.builtin.debug:
+        var: netstat.stdout_lines
+
+- name: Kubernetes Cluster Diagnostics
+  hosts: controlplanes
+  become: false
+  tags: [never, k8s]
+  tasks:
+    - name: Check cluster version
+      ansible.builtin.command: kubectl version --short
+      changed_when: false
+      register: k8s_version
+      failed_when: false
+
+    - name: Display cluster version
+      ansible.builtin.debug:
+        var: k8s_version.stdout_lines
+
+    - name: Get cluster info
+      ansible.builtin.command: kubectl cluster-info dump --output-directory=/tmp/cluster-info
+      changed_when: false
+
+    - name: Get all nodes with details
+      ansible.builtin.command: kubectl get nodes -o wide
+      changed_when: false
+      register: nodes
+
+    - name: Display node status
+      ansible.builtin.debug:
+        var: nodes.stdout_lines
+
+    - name: Describe nodes
+      ansible.builtin.command: kubectl describe nodes
+      changed_when: false
+      register: node_details
+
+    - name: Check for node issues
+      ansible.builtin.shell: |
+        set -o pipefail
+        kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type=="Ready" and .status!="True")) | .metadata.name'
+      changed_when: false
+      register: unhealthy_nodes
+      failed_when: false
+
+    - name: Display unhealthy nodes
+      ansible.builtin.debug:
+        msg: "{{ unhealthy_nodes.stdout_lines if unhealthy_nodes.stdout_lines else 'All nodes are healthy' }}"
+
+- name: Pod Diagnostics
+  hosts: controlplanes
+  become: false
+  tags: [never, pods]
+  tasks:
+    - name: Get all pods
+      ansible.builtin.command: kubectl get pods -A -o wide
+      changed_when: false
+      register: all_pods
+
+    - name: Display all pods
+      ansible.builtin.debug:
+        var: all_pods.stdout_lines
+
+    - name: Check for failing pods
+      ansible.builtin.shell: |
+        set -o pipefail
+        kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded
+      changed_when: false
+      register: failing_pods
+      failed_when: false
+
+    - name: Display failing pods
+      ansible.builtin.debug:
+        var: failing_pods.stdout_lines
+
+    - name: Get pod events
+      ansible.builtin.command: kubectl get events -A --sort-by='.lastTimestamp'
+      changed_when: false
+      register: events
+
+    - name: Display recent events
+      ansible.builtin.debug:
+        var: events.stdout_lines
+
+- name: CNI Diagnostics
+  hosts: k8s_cluster
+  become: true
+  tags: [never, cni]
+  tasks:
+    - name: Check Calico/CNI interfaces
+      ansible.builtin.command: ip addr show type vxlan
+      changed_when: false
+      register: vxlan
+      failed_when: false
+
+    - name: Display VXLAN interfaces
+      ansible.builtin.debug:
+        var: vxlan.stdout_lines
+
+    - name: Check for CNI errors in logs
+      ansible.builtin.command: journalctl -u kubelet -n 100 --no-pager | grep -i cni
+      changed_when: false
+      register: cni_logs
+      failed_when: false
+
+    - name: Display CNI logs
+      ansible.builtin.debug:
+        var: cni_logs.stdout_lines
+      when: cni_logs.stdout_lines | length > 0
+
+- name: Storage Diagnostics
+  hosts: controlplanes
+  become: false
+  tags: [never, storage]
+  tasks:
+    - name: Check persistent volumes
+      ansible.builtin.command: kubectl get pv
+      changed_when: false
+      register: pvs
+      failed_when: false
+
+    - name: Display persistent volumes
+      ansible.builtin.debug:
+        var: pvs.stdout_lines
+
+    - name: Check persistent volume claims
+      ansible.builtin.command: kubectl get pvc -A
+      changed_when: false
+      register: pvcs
+
+    - name: Display persistent volume claims
+      ansible.builtin.debug:
+        var: pvcs.stdout_lines
+
+- name: Certificate Diagnostics
+  hosts: k8s_cluster
+  become: true
+  tags: [never, certs]
+  tasks:
+    - name: Check certificate expiration
+      ansible.builtin.command: kubeadm certs check-expiration
+      changed_when: false
+      register: cert_expiration
+      failed_when: false
+
+    - name: Display certificate expiration
+      ansible.builtin.debug:
+        var: cert_expiration.stdout_lines
+
+    - name: Check for pending CSRs
+      ansible.builtin.command: kubectl get csr
+      changed_when: false
+      register: csrs
+      delegate_to: "{{ groups['controlplanes'][0] }}"
+      run_once: true
+      when: groups['controlplanes'] | length > 0
+
+    - name: Display CSRs
+      ansible.builtin.debug:
+        var: csrs.stdout_lines
+
+- name: Generate Diagnostics Report
+  hosts: localhost
+  gather_facts: false
+  tags: [always]
+  tasks:
+    - name: Create diagnostics directory
+      ansible.builtin.file:
+        path: ./diagnostics
+        state: directory
+        mode: '0755'
+
+    - name: Display available diagnostics
+      ansible.builtin.debug:
+        msg:
+          - "Troubleshooting Options:"
+          - ""
+          - "System Checks:"
+          - "  ansible-playbook troubleshoot.yaml --tags system"
+          - "  ansible-playbook troubleshoot.yaml --tags services"
+          - "  ansible-playbook troubleshoot.yaml --tags network"
+          - ""
+          - "Kubernetes Checks:"
+          - "  ansible-playbook troubleshoot.yaml --tags k8s"
+          - "  ansible-playbook troubleshoot.yaml --tags pods"
+          - "  ansible-playbook troubleshoot.yaml --tags cni"
+          - "  ansible-playbook troubleshoot.yaml --tags storage"
+          - "  ansible-playbook troubleshoot.yaml --tags certs"
+          - ""
+          - "Run all checks:"
+          - "  ansible-playbook troubleshoot.yaml --tags all"

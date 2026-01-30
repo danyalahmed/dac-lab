@@ -1,0 +1,141 @@
+---
+# Maintenance playbook - Common maintenance tasks
+# Usage: ansible-playbook maintenance.yaml --tags <tag>
+
+- name: Update System Packages
+  hosts: k8s_cluster
+  become: true
+  tags: [never, update-packages]
+  tasks:
+    - name: Update package cache
+      ansible.builtin.package:
+        update_cache: true
+
+    - name: Upgrade packages
+      ansible.builtin.package:
+        upgrade: dist
+      register: upgrade_result
+
+    - name: Check if reboot required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot if required
+      ansible.builtin.reboot:
+        msg: "Reboot required after package upgrade"
+        reboot_timeout: 600
+      when: reboot_required.stat.exists
+
+- name: Restart Kubernetes Services
+  hosts: k8s_cluster
+  become: true
+  tags: [never, restart-k8s]
+  tasks:
+    - name: Restart kubelet
+      ansible.builtin.systemd:
+        name: kubelet
+        state: restarted
+        daemon_reload: true
+
+    - name: Restart containerd
+      ansible.builtin.systemd:
+        name: containerd
+        state: restarted
+
+- name: Reconfigure Firewall
+  hosts: k8s_cluster
+  become: true
+  tags: [never, firewall]
+  tasks:
+    - name: Reload UFW rules
+      ansible.builtin.command: ufw reload
+      changed_when: false
+
+- name: Check Cluster Health
+  hosts: controlplanes
+  become: false
+  tags: [never, health-check]
+  tasks:
+    - name: Check cluster info
+      ansible.builtin.command: kubectl cluster-info
+      changed_when: false
+      register: cluster_info
+
+    - name: Display cluster info
+      ansible.builtin.debug:
+        var: cluster_info.stdout_lines
+
+    - name: Get node status
+      ansible.builtin.command: kubectl get nodes -o wide
+      changed_when: false
+      register: node_status
+
+    - name: Display node status
+      ansible.builtin.debug:
+        var: node_status.stdout_lines
+
+    - name: Get pod status in all namespaces
+      ansible.builtin.command: kubectl get pods -A
+      changed_when: false
+      register: pod_status
+
+    - name: Display pod status
+      ansible.builtin.debug:
+        var: pod_status.stdout_lines
+
+- name: Backup Kubernetes Configs
+  hosts: controlplanes
+  become: true
+  tags: [never, backup]
+  tasks:
+    - name: Create backup directory
+      ansible.builtin.file:
+        path: /opt/k8s-backup
+        state: directory
+        mode: '0700'
+
+    - name: Backup etcd
+      ansible.builtin.command: |
+        etcdctl snapshot save /opt/k8s-backup/etcd-snapshot-{{ ansible_date_time.iso8601_basic_short }}.db
+      environment:
+        ETCDCTL_API: "3"
+      changed_when: true
+
+    - name: Backup kubeconfig
+      ansible.builtin.copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /opt/k8s-backup/admin.conf-{{ ansible_date_time.iso8601_basic_short }}
+        remote_src: true
+        mode: '0600'
+
+    - name: Fetch backups to local machine
+      ansible.builtin.fetch:
+        src: /opt/k8s-backup/
+        dest: ./backups/
+        flat: false
+
+- name: Display Maintenance Options
+  hosts: localhost
+  gather_facts: false
+  tags: [always]
+  tasks:
+    - name: Show available maintenance tasks
+      ansible.builtin.debug:
+        msg:
+          - "Available maintenance tasks:"
+          - ""
+          - "  ansible-playbook maintenance.yaml --tags update-packages"
+          - "    → Update all system packages"
+          - ""
+          - "  ansible-playbook maintenance.yaml --tags restart-k8s"
+          - "    → Restart Kubernetes services"
+          - ""
+          - "  ansible-playbook maintenance.yaml --tags firewall"
+          - "    → Reload firewall rules"
+          - ""
+          - "  ansible-playbook maintenance.yaml --tags health-check"
+          - "    → Check cluster health"
+          - ""
+          - "  ansible-playbook maintenance.yaml --tags backup"
+          - "    → Backup etcd and configs"

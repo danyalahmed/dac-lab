@@ -1,0 +1,88 @@
+---
+# Validation playbook - run before main deployment
+# Usage: ansible-playbook validate.yaml
+
+- name: Validate Prerequisites
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Check Ansible version
+      ansible.builtin.assert:
+        that:
+          - ansible_version.full is version('2.15.0', '>=')
+        fail_msg: "Ansible version must be 2.15.0 or higher. Current version: {{ ansible_version.full }}"
+        success_msg: "Ansible version {{ ansible_version.full }} is supported"
+
+    - name: Check required variables are defined
+      ansible.builtin.assert:
+        that:
+          - kubernetes_version is defined
+          - pod_network_cidr is defined
+          - git_repo_url is defined
+        fail_msg: "Required variables are not defined. Check group_vars/all/main.yaml"
+        success_msg: "All required variables are defined"
+
+- name: Validate Inventory
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Check SSH connectivity
+      ansible.builtin.ping:
+      
+    - name: Verify OS family
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['os_family'] == 'Debian'
+        fail_msg: "OS must be Debian-based (Ubuntu). Found: {{ ansible_facts['os_family'] }}"
+        
+    - name: Verify Ubuntu version
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['distribution'] == 'Ubuntu'
+          - ansible_facts['distribution_version'] is version('22.04', '>=')
+        fail_msg: "Ubuntu 22.04+ required. Found: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+        success_msg: "Ubuntu {{ ansible_facts['distribution_version'] }} is supported"
+
+    - name: Check sudo access
+      ansible.builtin.command: sudo -n true
+      changed_when: false
+      
+    - name: Verify minimum RAM
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['memtotal_mb'] >= 2048
+        fail_msg: "Minimum 2GB RAM required. Found: {{ ansible_facts['memtotal_mb'] }}MB"
+        success_msg: "RAM: {{ ansible_facts['memtotal_mb'] }}MB"
+
+    - name: Verify minimum CPU cores
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['processor_vcpus'] >= 2
+        fail_msg: "Minimum 2 CPU cores required. Found: {{ ansible_facts['processor_vcpus'] }}"
+        success_msg: "CPU cores: {{ ansible_facts['processor_vcpus'] }}"
+
+- name: Validate Control Plane Nodes
+  hosts: controlplanes
+  gather_facts: false
+  tasks:
+    - name: Verify control plane group is not empty
+      ansible.builtin.assert:
+        that:
+          - groups['controlplanes'] | length > 0
+        fail_msg: "At least one control plane node required"
+        success_msg: "Control plane nodes: {{ groups['controlplanes'] | length }}"
+
+- name: Validation Complete
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Display summary
+      ansible.builtin.debug:
+        msg:
+          - "✓ All validations passed!"
+          - "✓ Ansible version: {{ ansible_version.full }}"
+          - "✓ Control plane nodes: {{ groups['controlplanes'] | length }}"
+          - "✓ Worker nodes: {{ groups['workers'] | default([]) | length }}"
+          - "✓ Total nodes: {{ groups['k8s_cluster'] | length }}"
+          - ""
+          - "Ready to run: ansible-playbook site.yaml"

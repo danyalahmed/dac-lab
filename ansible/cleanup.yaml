@@ -1,0 +1,122 @@
+---
+# Cleanup playbook - WARNING: Destructive operations!
+# Use with caution - this will remove Kubernetes and all data
+# Usage: ansible-playbook cleanup.yaml --extra-vars "confirm_cleanup=yes"
+
+- name: Confirm Cleanup
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Require explicit confirmation
+      ansible.builtin.assert:
+        that:
+          - confirm_cleanup is defined
+          - confirm_cleanup == "yes"
+        fail_msg: |
+          Cleanup not confirmed. This playbook will destroy the Kubernetes cluster!
+          To proceed, run: ansible-playbook cleanup.yaml --extra-vars "confirm_cleanup=yes"
+        success_msg: "Cleanup confirmed. Proceeding with cluster destruction..."
+
+    - name: Wait for final confirmation
+      ansible.builtin.pause:
+        prompt: |
+          
+          ⚠️  WARNING: This will DESTROY your Kubernetes cluster! ⚠️
+          
+          This action will:
+          - Reset kubeadm on all nodes
+          - Remove Kubernetes packages
+          - Delete all cluster data
+          - Remove network configurations
+          - Disable firewall rules
+          
+          Press Ctrl+C to abort, or Enter to continue...
+        seconds: 10
+
+- name: Reset Kubernetes Cluster
+  hosts: k8s_cluster
+  become: true
+  tasks:
+    - name: Reset kubeadm
+      ansible.builtin.command: kubeadm reset -f
+      register: kubeadm_reset_result
+      changed_when: kubeadm_reset_result.rc == 0
+      failed_when: false
+      tags: [reset]
+
+    - name: Unhold Kubernetes packages
+      ansible.builtin.dpkg_selections:
+        name: "{{ item }}"
+        selection: install
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
+      tags: [packages]
+
+    - name: Remove Kubernetes packages
+      ansible.builtin.apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: absent
+        allow_change_held_packages: true
+      tags: [packages]
+
+    - name: Remove Kubernetes directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/kubernetes
+        - /var/lib/kubelet
+        - /var/lib/etcd
+        - /etc/cni/net.d
+        - ~/.kube
+      tags: [cleanup]
+
+    - name: Remove containerd
+      ansible.builtin.package:
+        name: containerd
+        state: absent
+      tags: [packages]
+
+    - name: Disable firewall
+      community.general.ufw:
+        state: disabled
+      register: ufw_disable_result
+      failed_when: false
+      tags: [firewall]
+
+    - name: Re-enable swap
+      ansible.builtin.command: swapon -a
+      register: swap_result
+      changed_when: false
+      failed_when: false
+      tags: [system]
+
+    - name: Remove Kubernetes sysctl settings
+      ansible.builtin.file:
+        path: /etc/sysctl.d/99-kubernetes.conf
+        state: absent
+      tags: [system]
+
+    - name: Reboot nodes
+      ansible.builtin.reboot:
+        msg: "Reboot after Kubernetes cleanup"
+        reboot_timeout: 600
+      when: confirm_cleanup == "yes"
+      tags: [reboot]
+
+- name: Cleanup Complete
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Display summary
+      ansible.builtin.debug:
+        msg:
+          - "✓ Kubernetes cluster has been destroyed"
+          - "✓ All nodes have been reset"
+          - ""
+          - "To redeploy, run: ansible-playbook site.yaml"
