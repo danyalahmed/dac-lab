@@ -7,3 +7,12 @@ metadata:
 spec:
   interval: 1h
   url: https://kubernetes-sigs.github.io/headlamp/
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: istio-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://istio-release.storage.googleapis.com/charts
