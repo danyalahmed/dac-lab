@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - namespaces.yaml
   - sources.yaml
-  - metallb/flux-kustomizations.yaml
   - metrics-server
+  - metallb/flux-kustomizations.yaml
   - cert-manager
-  - istio
+  - istio/flux-kustomizations.yaml
