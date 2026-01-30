@@ -26,7 +26,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo
-  path: ./infrastructure/metallb/config.yaml
+  path: ./infrastructure/metallb/config
   dependsOn:
     - name: metallb-operator
   decryption:
