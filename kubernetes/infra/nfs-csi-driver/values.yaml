@@ -7,7 +7,7 @@ externalSnapshotter:
 storageClasses:
   - name: nfs-client
     parameters:
-      server: nfs-server.local
+      server: nfs-server.lab
       share: /mnt/nfs-share/kubernetes
       subDir: "${pvc.metadata.namespace}/${pvc.metadata.name}"
     reclaimPolicy: Retain
