@@ -1,3 +1,9 @@
+# Connection settings
 ansible_user: danny
+ansible_connection: ssh
 ansible_ssh_private_key_file: ~/.ssh/id_rsa
 ansible_python_interpreter: /usr/bin/python3.13
+
+# Common timeouts
+ansible_command_timeout: 300
+ansible_ssh_timeout: 30
