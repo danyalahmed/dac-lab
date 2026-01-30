@@ -5,3 +5,23 @@ metadata:
   name: kubernetes-dashboard
   labels:
     toolkit.fluxcd.io/tenant: platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: security
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homeautomation
