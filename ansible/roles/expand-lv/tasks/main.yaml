@@ -9,19 +9,33 @@
   when:
     - ansible_facts.lvm.vgs is defined
     - ansible_facts.lvm.vgs.keys() | list | length > 0
+  tags:
+    - storage
+    - lvm
 
 - name: Verify disk space after expansion
   ansible.builtin.command:
     cmd: df -h / --output=size,pcent
   register: disk_status
   changed_when: false
+  tags:
+    - storage
+    - verification
 
 - name: Debug disk status
   ansible.builtin.debug:
     msg: "Node {{ inventory_hostname }} root partition is now {{ disk_status.stdout_lines[1] }}"
+  tags:
+    - storage
+    - verification
 
 - name: Ensure local path provisioner directory exists
   ansible.builtin.file:
     path: "{{ local_path_provisioner_dir }}"
     state: directory
     mode: '0755'
+    owner: root
+    group: root
+  tags:
+    - storage
+    - kubernetes

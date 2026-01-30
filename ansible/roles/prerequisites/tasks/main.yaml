@@ -2,13 +2,18 @@
 - name: Update package cache
   ansible.builtin.package:
     update_cache: true
+  tags:
+    - packages
+    - update
 
 - name: Upgrade all packages to the latest version
   ansible.builtin.package:
     upgrade: dist
   register: prerequisites_system_upgrade
   notify: Reboot System
-  run_once: true
+  tags:
+    - packages
+    - upgrade
 
 - name: Ensure required packages are installed
   ansible.builtin.package:
@@ -25,12 +30,17 @@
       - gpg
       - nfs-common
     state: present
+  tags:
+    - packages
 
 - name: Disable Swap
   ansible.builtin.command:
     cmd: swapoff -a
   when: ansible_facts['swaptotal_mb'] > 0
-  changed_when: ansible_facts['swaptotal_mb'] > 0
+  changed_when: false
+  tags:
+    - swap
+    - system
 
 - name: Ensure swap is disabled in fstab
   ansible.posix.mount:
@@ -38,6 +48,9 @@
     fstype: swap
     state: absent
   when: ansible_facts['swaptotal_mb'] > 0
+  tags:
+    - swap
+    - system
 
 - name: Load required kernel modules
   community.general.modprobe:
@@ -46,6 +59,9 @@
   loop:
     - br_netfilter
     - overlay
+  tags:
+    - kernel
+    - modules
 
 - name: Persist kernel module settings
   ansible.builtin.copy:
@@ -56,6 +72,9 @@
     owner: root
     group: root
     mode: '0644'
+  tags:
+    - kernel
+    - modules
 
 - name: Set sysctl parameters for Kubernetes
   ansible.posix.sysctl:
@@ -63,40 +82,66 @@
     value: "{{ item.value }}"
     state: present
     reload: true
+    sysctl_file: /etc/sysctl.d/99-kubernetes.conf
   loop:
     - { name: 'net.bridge.bridge-nf-call-ip6tables', value: 1 }
     - { name: 'net.bridge.bridge-nf-call-iptables', value: 1 }
     - { name: 'net.ipv4.ip_forward', value: 1 }
+  tags:
+    - kernel
+    - sysctl
 
 - name: Install Containerd
   ansible.builtin.package:
     name: containerd
     state: present
+  tags:
+    - containerd
+    - packages
 
 - name: Deploy containerd configuration
   ansible.builtin.template:
     src: config.toml.j2
     dest: /etc/containerd/config.toml
     mode: '0644'
+    owner: root
+    group: root
   notify: Restart Containerd
+  tags:
+    - containerd
+    - config
 
 - name: Ensure containerd is started and enabled
   ansible.builtin.systemd:
     name: containerd
     state: started
     enabled: true
+    daemon_reload: true
+  tags:
+    - containerd
+    - services
 
 - name: Create Directory for Kubernetes Keyrings
   ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
     mode: '0755'
+    owner: root
+    group: root
+  tags:
+    - kubernetes
+    - repo
 
 - name: Add Kubernetes APT Repository GPG Key
   ansible.builtin.get_url:
     url: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version_short }}/deb/Release.key"
     dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
     mode: '0644'
+    owner: root
+    group: root
+  tags:
+    - kubernetes
+    - repo
 
 - name: Add Kubernetes APT Repository
   ansible.builtin.apt_repository:
@@ -104,6 +149,9 @@
     state: present
     filename: kubernetes
     update_cache: true
+  tags:
+    - kubernetes
+    - repo
 
 - name: Install Kubernetes packages
   ansible.builtin.package:
@@ -112,6 +160,9 @@
       - kubeadm={{ kubernetes_version_full }}
       - kubectl={{ kubernetes_version_full }}
     state: present
+  tags:
+    - kubernetes
+    - packages
 
 - name: Hold Kubernetes packages at current version
   ansible.builtin.dpkg_selections:
@@ -121,11 +172,17 @@
     - kubelet
     - kubeadm
     - kubectl
+  tags:
+    - kubernetes
+    - packages
 
 - name: Enable kubelet service
   ansible.builtin.service:
     name: kubelet
     enabled: true
+  tags:
+    - kubernetes
+    - services
 
 # Network fixes for Calico VXLAN
 - name: Create network fix systemd service
@@ -146,6 +203,9 @@
 
       [Install]
       WantedBy=multi-user.target
+  tags:
+    - network
+    - calico
 
 - name: Enable and start network fix service
   ansible.builtin.systemd:
@@ -153,3 +213,7 @@
     enabled: true
     state: started
     daemon_reload: true
+  tags:
+    - network
+    - calico
+    - services

@@ -3,11 +3,20 @@
   delegate_to: "{{ groups['controlplanes'][0] }}"
   register: kubeadm_join_command
   changed_when: false
+  run_once: true
+  tags:
+    - kubernetes
+    - workers
+    - join
 
 - name: Join worker nodes to the Kubernetes cluster
   ansible.builtin.command: "{{ kubeadm_join_command.stdout }} --v=5 --node-name {{ inventory_hostname }}"
   args:
     creates: /etc/kubernetes/kubelet.conf
+  tags:
+    - kubernetes
+    - workers
+    - join
 
 - name: Apply node labels
   ansible.builtin.command:
@@ -21,3 +30,7 @@
   changed_when: "'labeled' in label_cmd.stdout and 'not labeled' not in label_cmd.stdout"
   when: hostvars[item].node_labels is defined
   become: false
+  tags:
+    - kubernetes
+    - labels
+    - nodes

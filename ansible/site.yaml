@@ -3,6 +3,10 @@
   hosts: k8s_cluster
   become: true
   become_method: ansible.builtin.sudo
+  tags:
+    - setup
+    - prerequisites
+    - firewall
   roles:
     - prerequisites # Install required packages and dependencies, including kubeadm, kubelet, kubectl & containerd
     - firewall
@@ -13,6 +17,9 @@
   hosts: controlplanes
   become: true
   become_method: ansible.builtin.sudo
+  tags:
+    - setup
+    - controlplane
   roles:
     - k8s-setup
 
@@ -20,6 +27,9 @@
   hosts: k8s_cluster
   become: true
   become_method: ansible.builtin.sudo
+  tags:
+    - setup
+    - workers
   roles:
     - k8s-join-workers
 
@@ -29,6 +39,9 @@
   hosts: workers
   become: true
   become_method: ansible.builtin.sudo
+  tags:
+    - setup
+    - storage
   roles:
     - expand-lv
 
@@ -36,6 +49,9 @@
   hosts: controlplanes
   become: false
   become_method: ansible.builtin.sudo
+  tags:
+    - bootstrap
+    - apps
   roles:
     - k8s-bootstrap-apps
 
@@ -43,5 +59,8 @@
   hosts: workers
   become: true
   become_method: ansible.builtin.sudo
+  tags:
+    - setup
+    - final
   roles:
     - final-touches

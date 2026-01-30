@@ -8,6 +8,10 @@
         name: shared-services
         labels:
           istio.io/dataplane-mode: ambient
+  tags:
+    - kubernetes
+    - namespaces
+    - bootstrap
 
 - name: Create istio-system Namespace
   kubernetes.core.k8s:
@@ -17,8 +21,13 @@
       kind: Namespace
       metadata:
         name: istio-system
+  tags:
+    - kubernetes
+    - namespaces
+    - istio
+    - bootstrap
 
-- name: Create istio-system Namespace
+- name: Create security Namespace
   kubernetes.core.k8s:
     state: present
     definition:
@@ -28,6 +37,11 @@
         name: security
         labels:
           istio.io/dataplane-mode: ambient
+  tags:
+    - kubernetes
+    - namespaces
+    - security
+    - bootstrap
 
 - name: Create Cloudflare API Token Secret
   kubernetes.core.k8s:
@@ -41,6 +55,12 @@
       type: Opaque
       stringData:
         api-token: "{{ cloudflare_api_token }}"
+  no_log: true
+  tags:
+    - kubernetes
+    - secrets
+    - cloudflare
+    - bootstrap
 
 - name: Create Vault S3 credentials
   kubernetes.core.k8s:
@@ -55,6 +75,12 @@
       data:
         ACCESS_KEY_ID: "{{ 'vault' | b64encode }}"
         ACCESS_SECRET_KEY: "{{ seaweedfs_vault_secret_key | trim | b64encode }}"
+  no_log: true
+  tags:
+    - kubernetes
+    - secrets
+    - vault
+    - bootstrap
 
 - name: Create Seaweed S3 config Secrets
   kubernetes.core.k8s:
@@ -69,6 +95,11 @@
       data:
         s3-config.json: "{{ lookup('template', 'seaweedfs-s3-config.json.j2') | b64encode }}"
   no_log: true
+  tags:
+    - kubernetes
+    - secrets
+    - seaweedfs
+    - bootstrap
 
 - name: Create Seaweed Postgres credentials Secret
   kubernetes.core.k8s:
@@ -84,6 +115,12 @@
         username: "{{ 'seaweedfs' | b64encode }}"
         password: "{{ seaweedfs_postgres_password | trim | b64encode }}"
   no_log: true
+  tags:
+    - kubernetes
+    - secrets
+    - seaweedfs
+    - postgres
+    - bootstrap
 
 - name: Create Seaweed Backup credentials Secret
   kubernetes.core.k8s:
@@ -99,18 +136,33 @@
         ACCESS_KEY_ID: "{{ 'pg-backup' | b64encode }}"
         ACCESS_SECRET_KEY: "{{ seaweedfs_metadata_backup_secret_key | trim | b64encode }}"
   no_log: true
+  tags:
+    - kubernetes
+    - secrets
+    - seaweedfs
+    - backup
+    - bootstrap
 
 - name: Create argocd namespace
   kubernetes.core.k8s:
     name: argocd
     kind: Namespace
     state: present
+  tags:
+    - kubernetes
+    - namespaces
+    - argocd
+    - bootstrap
 
 - name: Install ArgoCD Manifests
   kubernetes.core.k8s:
     namespace: argocd
     src: "https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml"
     state: present
+  tags:
+    - kubernetes
+    - argocd
+    - bootstrap
 
 - name: Configure Wave Delay via ArgoCD ConfigMap
   kubernetes.core.k8s:
@@ -123,6 +175,10 @@
         namespace: argocd
       data:
         controller.sync.wave.delay: "10"
+  tags:
+    - kubernetes
+    - argocd
+    - config
 
 - name: Rollout Restart ArgoCD Application Controller
   kubernetes.core.k8s:
@@ -136,6 +192,10 @@
           metadata:
             annotations:
               kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
+  tags:
+    - kubernetes
+    - argocd
+    - config
 
 - name: Wait for ArgoCD Server to be ready
   kubernetes.core.k8s_info:
@@ -149,6 +209,10 @@
     - argocd_status.resources[0].status.readyReplicas | int > 0
   retries: 30
   delay: 10
+  tags:
+    - kubernetes
+    - argocd
+    - bootstrap
 
 - name: Register Private SSH Key for Git Repos
   kubernetes.core.k8s:
@@ -165,6 +229,11 @@
         type: git
         url: "{{ git_repo_url }}"
   no_log: true
+  tags:
+    - kubernetes
+    - argocd
+    - secrets
+    - git
 
 - name: Enable Helm in Kustomize for ArgoCD
   kubernetes.core.k8s_json_patch:
@@ -175,6 +244,11 @@
       - op: add
         path: /data/kustomize.buildOptions
         value: "--enable-helm"
+  tags:
+    - kubernetes
+    - argocd
+    - config
+    - kustomize
 
 - name: Restart ArgoCD Repo Server to apply changes
   kubernetes.core.k8s:
@@ -188,6 +262,10 @@
           metadata:
             annotations:
               kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
+  tags:
+    - kubernetes
+    - argocd
+    - config
 
 - name: Disable TLS verification in ArgoCD
   kubernetes.core.k8s:
@@ -198,6 +276,11 @@
     definition:
       data:
         server.insecure: "true"
+  tags:
+    - kubernetes
+    - argocd
+    - config
+    - tls
 
 - name: Restart ArgoCD Server to apply changes
   kubernetes.core.k8s:
@@ -211,6 +294,10 @@
           metadata:
             annotations:
               kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
+  tags:
+    - kubernetes
+    - argocd
+    - config
 
 - name: Register private repo with ssh
   kubernetes.core.k8s:
@@ -228,6 +315,11 @@
         url: "{{ git_private_repo_url }}"
         sshPrivateKey: "{{ lookup('file', ansible_ssh_private_key_file) }}"
   no_log: true
+  tags:
+    - kubernetes
+    - argocd
+    - secrets
+    - git
 
 - name: Deploy App of Apps Application
   kubernetes.core.k8s:
@@ -251,3 +343,8 @@
           automated:
             prune: true
             selfHeal: true
+  tags:
+    - kubernetes
+    - argocd
+    - apps
+    - bootstrap

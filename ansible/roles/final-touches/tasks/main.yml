@@ -5,17 +5,28 @@
   run_once: true
   become: false
   changed_when: false
+  tags:
+    - dns
+    - configuration
 
 - name: Set CoreDns Service IP fact
   ansible.builtin.set_fact:
     coredns_ip: "{{ coredns_service_ip.stdout }}"
   run_once: true
+  tags:
+    - dns
+    - configuration
 
 - name: Create resolved.conf.d directory
   ansible.builtin.file:
     path: /etc/systemd/resolved.conf.d
     state: directory
     mode: '0755'
+    owner: root
+    group: root
+  tags:
+    - dns
+    - configuration
 
 - name: Deploy Dns configuration
   ansible.builtin.copy:
@@ -25,16 +36,30 @@
       DNS="{{ coredns_ip }} 1.1.1.1"
       Domains=~svc.cluster.local ~cluster.local
     mode: '0644'
+    owner: root
+    group: root
   notify: Restart systemd-resolved
+  tags:
+    - dns
+    - configuration
 
 - name: Ensure /etc/resolv.conf points to systemd-resolved
   ansible.builtin.file:
     src: /run/systemd/resolve/resolv.conf
     dest: /etc/resolv.conf
     state: link
+    force: true
+  tags:
+    - dns
+    - configuration
 
 - name: Ensure local-path-provisioner directory exists on all nodes
   ansible.builtin.file:
     path: /var/lib/kubernetes/local-path-provisioner
     state: directory
     mode: '0777'
+    owner: root
+    group: root
+  tags:
+    - storage
+    - kubernetes
