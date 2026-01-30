@@ -1,6 +1,6 @@
 apps:
   - name: namespaces
-    wave: -1
+    tier: foundation
     project: infrastructure
     type: git
     repo: https://github.com/danyalahmed/dac-lab.git
@@ -10,7 +10,7 @@ apps:
 
 ### MetalLB
   - name: metallb
-    wave: 1
+    tier: foundation
     project: infrastructure
     type: git
     repo: git@github.com:danyalahmed/dac-lab-private.git
@@ -20,7 +20,7 @@ apps:
 
 ### Metrics Server
   - name: metrics-server
-    wave: 0
+    tier: foundation
     project: infrastructure
     type: helm
     repo: https://kubernetes-sigs.github.io/metrics-server/
@@ -30,7 +30,7 @@ apps:
 
 ### Storage Provisioners
   - name: local-path-provisioner
-    wave: 0
+    tier: foundation
     project: infrastructure
     type: helmFromGit
     repo: https://github.com/rancher/local-path-provisioner.git
@@ -43,7 +43,7 @@ apps:
     namespace: shared-services
 
   - name: nfs-csi-driver
-    wave: 0
+    tier: foundation
     project: infrastructure
     type: helm
     repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
@@ -56,7 +56,7 @@ apps:
 
 ### Cert-Manager
   - name: cert-manager
-    wave: 0
+    tier: operators
     project: infrastructure
     type: helm
     repo: https://charts.jetstack.io
@@ -68,7 +68,7 @@ apps:
     namespace: cert-manager
   # gateway and mutual TLS certs
   - name: certs
-    wave: 5
+    tier: security
     project: infrastructure
     type: git
     repo: git@github.com:danyalahmed/dac-lab-private.git
@@ -77,7 +77,7 @@ apps:
     namespace: istio-system 
 ### Gateway API
   - name: gateway-api
-    wave: 0
+    tier: mesh
     project: infrastructure
     type: git
     repo: https://github.com/danyalahmed/dac-lab.git
@@ -87,7 +87,7 @@ apps:
 
 ### Istio - Service Mesh
   - name: istio-base
-    wave: 0
+    tier: mesh
     project: infrastructure
     type: helm
     repo: https://istio-release.storage.googleapis.com/charts
@@ -98,7 +98,7 @@ apps:
     targetRevision: main
     namespace: istio-system
   - name: istiod
-    wave: 6
+    tier: mesh
     project: infrastructure
     type: helm
     repo: https://istio-release.storage.googleapis.com/charts
@@ -109,7 +109,7 @@ apps:
     targetRevision: main
     namespace: istio-system
   - name: istio-cni
-    wave: 6
+    tier: mesh
     project: infrastructure
     type: helm
     repo: https://istio-release.storage.googleapis.com/charts
@@ -120,7 +120,7 @@ apps:
     targetRevision: main
     namespace: istio-system
   - name: istio-ztunnel
-    wave: 6
+    tier: mesh
     project: infrastructure
     type: helm
     repo: https://istio-release.storage.googleapis.com/charts
@@ -128,7 +128,7 @@ apps:
     version: 1.28.3
     namespace: istio-system
   - name: istio-integrations
-    wave: 7
+    tier: apps
     project: infrastructure
     type: git
     repo: https://github.com/danyalahmed/dac-lab.git
@@ -138,7 +138,7 @@ apps:
 
 ### Postgresql (CloudNativePG)
   - name: cloudnative-pg-operator
-    wave: 1
+    tier: operators
     project: infrastructure
     type: helm
     repo: https://cloudnative-pg.io/charts
@@ -147,7 +147,7 @@ apps:
     namespace: shared-services
     serversideApply: true
   - name: barman-plugin
-    wave: 2
+    tier: data
     project: infrastructure
     type: helm
     repo: https://cloudnative-pg.io/charts
@@ -157,7 +157,7 @@ apps:
 
 ### SeaweedFS
   - name: seaweedfs-operator
-    wave: 1
+    tier: operators
     project: infrastructure
     type: helm
     repo: https://seaweedfs.github.io/seaweedfs-operator
@@ -166,7 +166,7 @@ apps:
     namespace: shared-services
 
   - name: seaweedfs-cluster
-    wave: 3
+    tier: data
     project: infrastructure
     type: git
     repo: https://github.com/danyalahmed/dac-lab.git
@@ -176,7 +176,7 @@ apps:
 
 ### HashiCorp Vault
   - name: vault
-    wave: 4
+    tier: security
     project: security
     type: helm
     repo: https://helm.releases.hashicorp.com
@@ -187,7 +187,7 @@ apps:
     targetRevision: main
     namespace: security
   - name: vault-pki-integration
-    wave: 5
+    tier: security
     project: security
     type: git
     repo: git@github.com:danyalahmed/dac-lab-private.git
@@ -197,7 +197,7 @@ apps:
 
 ### External Secrets Operator
   - name: external-secrets-operator
-    wave: 5
+    tier: security
     project: security
     type: helm
     repo: https://charts.external-secrets.io
@@ -208,7 +208,7 @@ apps:
 
 ### ArgoCD Route
   - name: argocd-route
-    wave: 11
+    tier: apps
     project: infrastructure
     type: git
     repo: https://github.com/danyalahmed/dac-lab.git
@@ -218,7 +218,7 @@ apps:
 
 ### Nextcloud
   - name: nextcloud
-    wave: 11
+    tier: apps
     project: homeautomation
     type: git
     repo: git@github.com:danyalahmed/dac-lab-private.git
@@ -227,7 +227,7 @@ apps:
     namespace: homeautomation
 ### Home Assistant
   - name: home-assistant
-    wave: 11
+    tier: apps
     project: homeautomation
     type: git
     repo: git@github.com:danyalahmed/dac-lab-private.git
@@ -237,7 +237,7 @@ apps:
 
 ### misc
   - name: misc
-    wave: 21
+    tier: default
     project: default
     type: git
     repo: https://github.com/danyalahmed/dac-lab.git

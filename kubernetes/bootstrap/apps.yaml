@@ -5,6 +5,17 @@ metadata:
   namespace: argocd
 spec:
   goTemplate: true
+  strategy:
+    type: RollingSync
+    deletionOrder: Reverse
+    steps:
+      - matchExpressions: [{key: tier, operator: In, values: ["foundation"]}]
+      - matchExpressions: [{key: tier, operator: In, values: ["operators"]}]
+      - matchExpressions: [{key: tier, operator: In, values: ["data"]}]
+      - matchExpressions: [{key: tier, operator: In, values: ["security"]}]
+      - matchExpressions: [{key: tier, operator: In, values: ["mesh"]}]
+      - matchExpressions: [{key: tier, operator: In, values: ["apps"]}]
+      - matchExpressions: [{key: tier, operator: In, values: ["default"]}]
   generators:
     - matrix:
         generators:
@@ -18,8 +29,8 @@ spec:
   template:
     metadata:
       name: '{{.name}}'
-      annotations:
-        argocd.argoproj.io/sync-wave: '{{.wave}}'
+      labels:
+        tier: '{{.tier}}'
     spec:
       project: '{{.project}}'
       destination:
