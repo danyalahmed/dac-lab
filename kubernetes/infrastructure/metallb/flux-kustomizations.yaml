@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo
-  path: ./infrastructure/metallb/operator.yaml
+  path: ./kubernetes/infrastructure/metallb/operator.yaml
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -26,7 +26,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo
-  path: ./infrastructure/metallb/config
+  path: ./kubernetes/infrastructure/metallb/config
   dependsOn:
     - name: metallb-operator
   decryption:
