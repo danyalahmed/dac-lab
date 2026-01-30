@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespaces.yaml
   - sources.yaml
+  - matallb
   - metrics-server
   - cert-manager
   - istio
