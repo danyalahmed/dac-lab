@@ -16,3 +16,12 @@ metadata:
 spec:
   interval: 1h
   url: https://istio-release.storage.googleapis.com/charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: jetstack-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.jetstack.io
