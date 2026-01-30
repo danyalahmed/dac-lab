@@ -50,7 +50,7 @@ apps:
     chart: csi-driver-nfs
     version: 4.12.1
     hasOverride: true
-    overridesRepo: https://github.com/danyalahmed/dac-lab.git
+    overridesRepo: git@github.com:danyalahmed/dac-lab-private.git
     targetRevision: main
     namespace: shared-services
 
