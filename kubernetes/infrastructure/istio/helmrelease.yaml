@@ -1,0 +1,120 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: istio-base
+  namespace: istio-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: base
+      version: 1.28.3
+      sourceRef:
+        kind: HelmRepository
+        name: istio-repo
+        namespace: flux-system
+      interval: 12h
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    defaultRevision: default
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: istiod
+  namespace: istio-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: istiod
+      version: 1.28.3
+      sourceRef:
+        kind: HelmRepository
+        name: istio-repo
+        namespace: flux-system
+      interval: 12h
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    profile: ambient
+    pilot:
+      env:
+        PILOT_ENABLE_AMBIENT_MODE: "true"
+      cni:
+        enabled: true
+    meshConfig:
+      accessLogFile: /dev/stdout
+      accessLogEncoding: JSON
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: istio-cni
+  namespace: istio-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: cni
+      version: 1.28.3
+      sourceRef:
+        kind: HelmRepository
+        name: istio-repo
+        namespace: flux-system
+      interval: 12h
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    cni:
+      excludeNamespaces:
+        - kube-system
+        - istio-system
+    ambient:
+      enabled: true
+      shareHostNetworkNamespace: true
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: istio-ztunnel
+  namespace: istio-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: ztunnel
+      version: 1.28.3
+      sourceRef:
+        kind: HelmRepository
+        name: istio-repo
+        namespace: flux-system
+      interval: 12h
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
