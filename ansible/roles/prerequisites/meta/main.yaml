@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  role_name: prerequisites
+  author: Danyal Ahmed
+  description: Install and configure prerequisites for Kubernetes cluster
+  company: dac-lab
+  
+  license: MIT
+  
+  min_ansible_version: "2.15"
+  
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  
+  galaxy_tags:
+    - kubernetes
+    - k8s
+    - containerd
+    - system
+
+dependencies: []

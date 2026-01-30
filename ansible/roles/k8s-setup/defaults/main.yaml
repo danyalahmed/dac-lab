@@ -1,0 +1,25 @@
+---
+# Default variables for k8s-setup role
+
+# Kubernetes configuration
+kubernetes_version: "1.35.0"
+pod_network_cidr: "10.240.0.0/16"
+service_subnet: "10.96.0.0/12"
+cluster_dns_ip: "10.96.0.10"
+
+# Calico version
+calico_version: "v3.31.3"
+
+# DNS servers for CoreDNS
+desired_dns_servers: "1.1.1.1"
+
+# CSR approver
+kubelet_csr_approver_version: "1.2.12"
+csr_approver_installed: false
+
+# API server wait timeout
+api_server_timeout: 300
+
+# Calico operator wait settings
+calico_operator_retries: 20
+calico_operator_delay: 15

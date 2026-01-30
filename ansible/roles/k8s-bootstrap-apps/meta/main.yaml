@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  role_name: k8s_bootstrap_apps
+  author: Danyal Ahmed
+  description: Bootstrap Day 0 applications including ArgoCD
+  company: dac-lab
+  
+  license: MIT
+  
+  min_ansible_version: "2.15"
+  
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  
+  galaxy_tags:
+    - kubernetes
+    - argocd
+    - gitops
+    - bootstrap
+
+dependencies: []

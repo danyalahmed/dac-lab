@@ -1,0 +1,20 @@
+---
+# Default variables for k8s-bootstrap-apps role
+
+# ArgoCD configuration
+argocd_version: "v3.2.3"
+argocd_namespace: argocd
+argocd_server_readiness_retries: 30
+argocd_server_readiness_delay: 10
+
+# Wave delay for ArgoCD sync
+argocd_sync_wave_delay: "10"
+
+# Git repository URLs
+git_repo_url: "https://github.com/danyalahmed/dac-lab.git"
+git_private_repo_url: "git@github.com:danyalahmed/dac-lab-private.git"
+
+# Root application configuration
+root_app_name: root-app
+root_app_path: kubernetes/bootstrap
+root_app_revision: main

@@ -1,0 +1,8 @@
+---
+# Default variables for final-touches role
+
+# DNS configuration
+fallback_dns_server: "1.1.1.1"
+
+# Local path provisioner directory
+local_path_provisioner_dir: "/var/lib/kubernetes/local-path-provisioner"

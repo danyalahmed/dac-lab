@@ -1,0 +1,17 @@
+---
+# Default variables for prerequisites role
+
+# Package list can be extended by users
+prerequisites_additional_packages: []
+
+# Kubernetes versions
+kubernetes_version: "1.35.0"
+kubernetes_version_full: "1.35.0-1.1"
+kubernetes_version_short: "1.35"
+
+# Containerd configuration
+containerd_state: started
+containerd_enabled: true
+
+# System optimization
+swap_disable: true

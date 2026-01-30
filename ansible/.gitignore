@@ -1,0 +1,36 @@
+# Ansible
+*.retry
+.ansible/
+/tmp/ansible_facts/
+backups/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sensitive files (keep encrypted versions only)
+**/vault.yaml.decrypted
+**/secrets.yaml
+**/*_rsa
+**/*_rsa.pub
+**/*.pem
+
+# Temporary files
+*.log
+*.tmp

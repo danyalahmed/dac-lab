@@ -1,0 +1,8 @@
+---
+# Default variables for k8s-join-workers role
+
+# Kubeadm join verbosity
+kubeadm_verbosity: 5
+
+# Auto-apply node labels
+apply_node_labels: true

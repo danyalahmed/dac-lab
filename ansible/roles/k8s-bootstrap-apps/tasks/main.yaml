@@ -276,6 +276,7 @@
     definition:
       data:
         server.insecure: "true"
+        applicationsetcontroller.enable.progressive.syncs: "true"
   tags:
     - kubernetes
     - argocd

@@ -1,0 +1,12 @@
+---
+# Default variables for firewall role
+
+# Pod network CIDR (must match cluster configuration)
+pod_network_cidr: "10.240.0.0/16"
+
+# UFW policy
+ufw_default_policy: deny
+ufw_state: enabled
+
+# Additional custom firewall rules (can be extended)
+firewall_custom_rules: []

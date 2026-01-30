@@ -1,0 +1,43 @@
+---
+# .ansible-lint configuration
+
+# Exclude specific paths
+exclude_paths:
+  - .git/
+  - .github/
+  - backups/
+  - /tmp/
+
+# Use default rules
+skip_list:
+  - 'yaml[line-length]'  # Allow longer lines in some cases
+  - 'name[casing]'       # Allow flexible task naming
+  - 'var-naming[no-role-prefix]'  # Allow shared variables across roles
+  - 'args[module]'       # Mock kubernetes modules cause false positives
+  - 'run-once[task]'     # run_once is intentional with delegation
+  - 'role-name'          # Allow hyphens in role names (established naming)
+  
+# Enable specific rules
+enable_list:
+  - 'yaml'
+  - 'args'
+  - 'command-instead-of-module'
+  - 'deprecated-module'
+
+# Set warning level
+warn_list:
+  - 'experimental'
+  - 'role-name'
+
+# Mock modules and roles
+mock_modules:
+  - kubernetes.core.k8s
+  - kubernetes.core.k8s_info
+  - kubernetes.core.helm
+  - kubernetes.core.helm_repository
+  - kubernetes.core.k8s_json_patch
+
+mock_roles: []
+
+# Use default parsers
+skip_action_validation: false

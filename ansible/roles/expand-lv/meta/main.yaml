@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  role_name: expand_lv
+  author: Danyal Ahmed
+  description: Expand logical volumes on worker nodes
+  company: dac-lab
+  
+  license: MIT
+  
+  min_ansible_version: "2.15"
+  
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  
+  galaxy_tags:
+    - storage
+    - lvm
+    - filesystem
+
+dependencies: []

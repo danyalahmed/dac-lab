@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  role_name: final_touches
+  author: Danyal Ahmed
+  description: Final configuration touches for worker nodes
+  company: dac-lab
+  
+  license: MIT
+  
+  min_ansible_version: "2.15"
+  
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  
+  galaxy_tags:
+    - kubernetes
+    - dns
+    - configuration
+
+dependencies: []

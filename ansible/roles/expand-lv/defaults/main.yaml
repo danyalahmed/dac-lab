@@ -1,0 +1,9 @@
+---
+# Default variables for expand-lv role
+
+# Local path provisioner directory
+local_path_provisioner_dir: "/var/lib/local-path-provisioner"
+
+# LVM expansion settings
+lvm_size: "+100%FREE"
+lvm_resizefs: true
