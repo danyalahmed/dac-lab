@@ -5,5 +5,5 @@ resources:
   - sources.yaml
   - metrics-server
   - metallb/flux-kustomizations.yaml
-  - cert-manager
+  - cert-manager/flux-kustomizations.yaml
   - istio/flux-kustomizations.yaml
