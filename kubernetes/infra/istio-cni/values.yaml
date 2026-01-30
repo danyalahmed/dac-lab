@@ -1,9 +1,0 @@
-cni:
-  excludeNamespaces:
-    - kube-system
-    - istio-system
-    - security        # Where Vault lives
-    - shared-services # Where SeaweedFS lives
-ambient:
-  enabled: true
-  shareHostNetworkNamespace: true

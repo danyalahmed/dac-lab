@@ -1,13 +1,3 @@
-apps:
-  - name: namespaces
-    tier: foundation
-    project: infrastructure
-    type: git
-    repo: https://github.com/danyalahmed/dac-lab.git
-    location: kubernetes/infra/namespaces
-    targetRevision: main
-    namespace: shared-services
-
 ### MetalLB
   - name: metallb
     tier: foundation
@@ -75,58 +65,8 @@ apps:
     location: kubernetes/infra/certs
     targetRevision: main
     namespace: istio-system 
-### Gateway API
-  - name: gateway-api
-    tier: mesh
-    project: infrastructure
-    type: git
-    repo: https://github.com/danyalahmed/dac-lab.git
-    location: kubernetes/infra/gateway
-    targetRevision: main
-    namespace: istio-system
 
 ### Istio - Service Mesh
-  - name: istio-base
-    tier: mesh
-    project: infrastructure
-    type: helm
-    repo: https://istio-release.storage.googleapis.com/charts
-    chart: base
-    version: 1.28.3
-    hasOverride: true
-    overridesRepo: https://github.com/danyalahmed/dac-lab.git
-    targetRevision: main
-    namespace: istio-system
-  - name: istiod
-    tier: mesh
-    project: infrastructure
-    type: helm
-    repo: https://istio-release.storage.googleapis.com/charts
-    chart: istiod
-    version: 1.28.3
-    hasOverride: true
-    overridesRepo: https://github.com/danyalahmed/dac-lab.git
-    targetRevision: main
-    namespace: istio-system
-  - name: istio-cni
-    tier: mesh
-    project: infrastructure
-    type: helm
-    repo: https://istio-release.storage.googleapis.com/charts
-    chart: cni
-    version: 1.28.3
-    hasOverride: true
-    overridesRepo: https://github.com/danyalahmed/dac-lab.git
-    targetRevision: main
-    namespace: istio-system
-  - name: istio-ztunnel
-    tier: mesh
-    project: infrastructure
-    type: helm
-    repo: https://istio-release.storage.googleapis.com/charts
-    chart: ztunnel
-    version: 1.28.3
-    namespace: istio-system
   - name: istio-integrations
     tier: apps
     project: infrastructure
