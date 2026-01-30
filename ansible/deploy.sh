@@ -38,12 +38,17 @@ check_requirements() {
     
     # Check kubectl
     if ! command -v kubectl &> /dev/null; then
-        log_warn "kubectl not found. Required for ArgoCD installation."
+        log_warn "kubectl not found. Required for Kubernetes operations."
     fi
     
     # Check helm
     if ! command -v helm &> /dev/null; then
         log_warn "helm not found. Required for CSR approver installation."
+    fi
+    
+    # Check flux
+    if ! command -v flux &> /dev/null; then
+        log_warn "flux not found. Required for FluxCD bootstrap."
     fi
 }
 

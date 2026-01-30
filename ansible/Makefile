@@ -11,7 +11,7 @@ help:
 	@echo "  make validate       - Validate inventory and prerequisites"
 	@echo "  make deploy         - Full cluster deployment (setup + bootstrap)"
 	@echo "  make setup          - Setup cluster infrastructure only"
-	@echo "  make bootstrap      - Bootstrap applications (ArgoCD)"
+	@echo "  make bootstrap      - Bootstrap applications"
 	@echo "  make health         - Check cluster health"
 	@echo "  make backup         - Backup etcd and configs"
 	@echo "  make cleanup        - Destroy cluster (DANGEROUS!)"
@@ -20,7 +20,6 @@ help:
 	@echo "Tag-based targets:"
 	@echo "  make firewall       - Configure firewall only"
 	@echo "  make kubernetes     - Kubernetes-specific tasks only"
-	@echo "  make argocd         - Install/update ArgoCD"
 	@echo ""
 	@echo "Environment variables:"
 	@echo "  TAGS=<tags>         - Run specific tags"
@@ -73,9 +72,6 @@ firewall:
 
 kubernetes:
 	$(call run-playbook,site.yaml --tags kubernetes)
-
-argocd:
-	$(call run-playbook,site.yaml --tags argocd)
 
 dns:
 	$(call run-playbook,site.yaml --tags dns)

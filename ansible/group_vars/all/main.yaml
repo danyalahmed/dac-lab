@@ -3,7 +3,6 @@ kubernetes_version_full: "1.35.0-1.1"
 kubernetes_version_short: "1.35"
 pod_network_cidr: "10.240.0.0/16"
 
-argocd_version: "v3.2.3"
 calico_version: "v3.31.3"
 kubelet_csr_approver_version: "1.2.12"
 

@@ -143,209 +143,49 @@
     - backup
     - bootstrap
 
-- name: Create argocd namespace
-  kubernetes.core.k8s:
-    name: argocd
+- name: Check if Flux is already bootstrapped
+  kubernetes.core.k8s_info:
     kind: Namespace
-    state: present
+    name: flux-system
+  register: flux_namespace
   tags:
     - kubernetes
-    - namespaces
-    - argocd
+    - flux
     - bootstrap
 
-- name: Install ArgoCD Manifests
-  kubernetes.core.k8s:
-    namespace: argocd
-    src: "https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml"
-    state: present
+- name: Bootstrap FluxCD to cluster
+  ansible.builtin.command:
+    cmd: >
+      flux bootstrap git
+      --url=ssh://git@github.com/{{ flux_github_owner }}/{{ flux_github_repo }}
+      --branch={{ flux_branch }}
+      --path={{ flux_path }}
+      --private-key-file={{ flux_ssh_key_file | expanduser }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  delegate_to: localhost
+  become: false
+  when: flux_namespace.resources | length == 0
+  register: flux_bootstrap_result
+  changed_when: flux_bootstrap_result.rc == 0
   tags:
     - kubernetes
-    - argocd
+    - flux
     - bootstrap
 
-- name: Configure Wave Delay via ArgoCD ConfigMap
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: argocd-cmd-params-cm
-        namespace: argocd
-      data:
-        controller.sync.wave.delay: "10"
-  tags:
-    - kubernetes
-    - argocd
-    - config
-
-- name: Rollout Restart ArgoCD Application Controller
-  kubernetes.core.k8s:
-    state: patched
-    kind: StatefulSet
-    name: argocd-application-controller
-    namespace: argocd
-    definition:
-      spec:
-        template:
-          metadata:
-            annotations:
-              kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
-  tags:
-    - kubernetes
-    - argocd
-    - config
-
-- name: Wait for ArgoCD Server to be ready
+- name: Wait for Flux controllers to be ready
   kubernetes.core.k8s_info:
     kind: Deployment
-    name: argocd-server
-    namespace: argocd
-  register: argocd_status
+    namespace: flux-system
+  register: flux_deployments
   until:
-    - argocd_status.resources | length > 0
-    - argocd_status.resources[0].status.readyReplicas is defined
-    - argocd_status.resources[0].status.readyReplicas | int > 0
+    - flux_deployments.resources | length > 0
+    - flux_deployments.resources | selectattr('status.readyReplicas', 'defined') | list | length == flux_deployments.resources | length
+    - flux_deployments.resources | map(attribute='status.readyReplicas') | select('defined') | list | length == flux_deployments.resources | length
   retries: 30
   delay: 10
   tags:
     - kubernetes
-    - argocd
+    - flux
     - bootstrap
 
-- name: Register Private SSH Key for Git Repos
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: dac-lab-repo
-        namespace: argocd
-        labels:
-          argocd.argoproj.io/secret-type: repository
-      stringData:
-        type: git
-        url: "{{ git_repo_url }}"
-  no_log: true
-  tags:
-    - kubernetes
-    - argocd
-    - secrets
-    - git
-
-- name: Enable Helm in Kustomize for ArgoCD
-  kubernetes.core.k8s_json_patch:
-    kind: ConfigMap
-    name: argocd-cm
-    namespace: argocd
-    patch:
-      - op: add
-        path: /data/kustomize.buildOptions
-        value: "--enable-helm"
-  tags:
-    - kubernetes
-    - argocd
-    - config
-    - kustomize
-
-- name: Restart ArgoCD Repo Server to apply changes
-  kubernetes.core.k8s:
-    state: patched
-    kind: Deployment
-    name: argocd-repo-server
-    namespace: argocd
-    definition:
-      spec:
-        template:
-          metadata:
-            annotations:
-              kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
-  tags:
-    - kubernetes
-    - argocd
-    - config
-
-- name: Disable TLS verification in ArgoCD
-  kubernetes.core.k8s:
-    state: patched
-    kind: ConfigMap
-    name: argocd-cmd-params-cm
-    namespace: argocd
-    definition:
-      data:
-        server.insecure: "true"
-        applicationsetcontroller.enable.progressive.syncs: "true"
-  tags:
-    - kubernetes
-    - argocd
-    - config
-    - tls
-
-- name: Restart ArgoCD Server to apply changes
-  kubernetes.core.k8s:
-    state: patched
-    kind: Deployment
-    name: argocd-server
-    namespace: argocd
-    definition:
-      spec:
-        template:
-          metadata:
-            annotations:
-              kubectl.kubernetes.io/restartedAt: "{{ ansible_facts['date_time'].iso8601 }}"
-  tags:
-    - kubernetes
-    - argocd
-    - config
-
-- name: Register private repo with ssh
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: dac-lab-private-repo
-        namespace: argocd
-        labels:
-          argocd.argoproj.io/secret-type: repository
-      stringData:
-        type: git
-        url: "{{ git_private_repo_url }}"
-        sshPrivateKey: "{{ lookup('file', ansible_ssh_private_key_file) }}"
-  no_log: true
-  tags:
-    - kubernetes
-    - argocd
-    - secrets
-    - git
-
-- name: Deploy App of Apps Application
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: argoproj.io/v1alpha1
-      kind: Application
-      metadata:
-        name: root-app
-        namespace: argocd
-      spec:
-        project: default
-        source:
-          repoURL: "{{ git_repo_url }}"
-          targetRevision: main
-          path: kubernetes/bootstrap
-        destination:
-          server: https://kubernetes.default.svc
-          namespace: argocd
-        syncPolicy:
-          automated:
-            prune: true
-            selfHeal: true
-  tags:
-    - kubernetes
-    - argocd
-    - apps
-    - bootstrap
