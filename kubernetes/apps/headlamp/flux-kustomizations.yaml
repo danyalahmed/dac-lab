@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: homeassistant
+  name: headlamp
   namespace: flux-system
 spec:
   interval: 10m
@@ -12,9 +12,10 @@ spec:
   force: false
   sourceRef:
     kind: GitRepository
-    name: dac-lab-private-repo
-  path: ./kubernetes/apps/homeassistant
-  dependsOn:
-    - name: istio-gatewayapi
-    - name: istio-mesh
-    - name: istio-defaultgateway
+    name: dac-lab-repo
+  path: ./kubernetes/apps/headlamp
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: headlamp
+      namespace: kube-system

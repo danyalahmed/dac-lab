@@ -1,0 +1,112 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: infrastructure-alerts
+  namespace: flux-system
+spec:
+  summary: "Flux Infrastructure Alerts"
+  eventSeverity: error
+  eventSources:
+    - kind: GitRepository
+      name: '*'
+      namespace: flux-system
+    - kind: HelmRepository
+      name: '*'
+      namespace: flux-system
+    - kind: HelmRelease
+      name: '*'
+      namespace: '*'
+    - kind: Kustomization
+      name: 'metallb-*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'cert-manager*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'istio-*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'gatewayapi'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'default-gateway'
+      namespace: flux-system
+    - kind: Kustomization
+      name: '*-provisioner'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'nfs-csi-driver*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'cloudnative-pg-*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'seaweedfs-*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'vault*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'external-secrets-*'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'metrics-server'
+      namespace: flux-system
+  providerRef:
+    name: slack
+  suspend: false
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: apps-alerts
+  namespace: flux-system
+spec:
+  summary: "Flux Applications Alerts"
+  eventSeverity: error
+  eventSources:
+    - kind: Kustomization
+      name: 'homeassistant'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'nextcloud'
+      namespace: flux-system
+    - kind: Kustomization
+      name: 'headlamp'
+      namespace: flux-system
+  providerRef:
+    name: slack
+  suspend: false
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: all-kustomizations-info
+  namespace: flux-system
+spec:
+  summary: "Flux Kustomizations Info"
+  eventSeverity: info
+  eventSources:
+    - kind: Kustomization
+      name: '*'
+      namespace: flux-system
+  providerRef:
+    name: generic-webhook
+  suspend: true  # Set to false to enable info-level notifications
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: critical-system-alerts
+  namespace: flux-system
+spec:
+  summary: "Critical System Component Alerts"
+  eventSeverity: error
+  eventSources:
+    - kind: Kustomization
+      name: 'flux-system'
+      namespace: flux-system
+  providerRef:
+    name: discord
+  suspend: false

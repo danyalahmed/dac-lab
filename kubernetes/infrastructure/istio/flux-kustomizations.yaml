@@ -5,9 +5,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  retryInterval: 1m
   prune: true
   wait: true
   timeout: 5m
+  force: false
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo
@@ -20,15 +22,23 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  retryInterval: 1m
   prune: true
   wait: true
   timeout: 5m
+  force: false
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo
   path: ./kubernetes/infrastructure/istio/mesh
   dependsOn:
     - name: gatewayapi
+    - name: vault-pki-integration
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: istiod
+      namespace: istio-system
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -37,9 +47,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  retryInterval: 1m
   prune: true
   wait: true
   timeout: 5m
+  force: false
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo

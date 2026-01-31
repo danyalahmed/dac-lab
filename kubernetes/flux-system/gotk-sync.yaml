@@ -25,3 +25,12 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+  postBuild:
+    substitute:
+      clusterName: "dac-lab"
+      clusterDomain: "cluster.local"
+      baseDomain: "dac-lab.local"
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-config
+        optional: true

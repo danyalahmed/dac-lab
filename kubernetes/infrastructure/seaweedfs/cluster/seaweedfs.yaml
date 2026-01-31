@@ -1,0 +1,55 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Seaweed
+metadata:
+  name: seaweedfs
+  namespace: shared-services
+spec:
+  image: chrislusf/seaweedfs:4.06
+  master:
+    replicas: 1
+    volumeSizeLimitMB: 1024
+
+  volume:
+    replicas: 2
+    requests:
+      storage: 100Gi
+    storageClassName: nfs-client
+
+  filer:
+    env:
+      - name: WEED_POSTGRES_ENABLED
+        value: "true"
+      - name: WEED_POSTGRES_HOSTNAME
+        value: "seaweedfs-metadata-rw.shared-services.svc"
+      - name: WEED_POSTGRES_PORT
+        value: "5432"
+      - name: WEED_POSTGRES_DATABASE
+        value: "seaweedfs"
+      - name: WEED_POSTGRES_USERNAME
+        value: "seaweedfs"
+      - name: WEED_POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: seaweedfs-pg-credentials
+            key: password
+      - name: WEED_POSTGRES_CREATETABLE
+        value: "true"
+      - name: WEED_POSTGRES_SSLMODE
+        value: "disable"
+    replicas: 2
+    persistence:
+      enabled: true
+      storageClassName: "nfs-client"
+      mountPath: /data
+      resources:
+        requests:
+          storage: 5Gi
+    s3:
+      enabled: true
+      configSecret:
+        name: seaweedfs-s3-config
+        key: s3-config.json
+    config: |
+      [postgres]
+      enabled = true
+      createTable = true

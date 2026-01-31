@@ -3,7 +3,14 @@ kind: Kustomization
 resources:
   - namespaces.yaml
   - sources.yaml
-  - metrics-server
+  - metrics-server/flux-kustomizations.yaml
+  - local-path-provisioner/flux-kustomizations.yaml
+  - nfs-csi-driver/flux-kustomizations.yaml
   - metallb/flux-kustomizations.yaml
   - cert-manager/flux-kustomizations.yaml
   - istio/flux-kustomizations.yaml
+  - cloudnative-pg/flux-kustomizations.yaml
+  - seaweedfs/flux-kustomizations.yaml
+  - vault/flux-kustomizations.yaml
+  - external-secrets/flux-kustomizations.yaml
+  - istio-integrations/flux-kustomizations.yaml

@@ -5,13 +5,24 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  retryInterval: 1m
   prune: true
   wait: true
   timeout: 5m
+  force: false
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo
   path: ./kubernetes/infrastructure/metallb/operator
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: metallb-controller
+      namespace: metallb-system
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: metallb-speaker
+      namespace: metallb-system
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -20,9 +31,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  retryInterval: 1m
   prune: true
   wait: true
   timeout: 5m
+  force: false
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo

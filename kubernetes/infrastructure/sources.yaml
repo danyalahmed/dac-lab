@@ -58,3 +58,59 @@ metadata:
 spec:
   interval: 1h
   url: https://kubernetes-sigs.github.io/metrics-server/
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: local-path-provisioner-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://github.com/rancher/local-path-provisioner.git
+  ref:
+    tag: v0.0.34
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: nfs-csi-driver-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cloudnative-pg-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://cloudnative-pg.io/charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: seaweedfs-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://seaweedfs.github.io/seaweedfs-operator
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: hashicorp-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://helm.releases.hashicorp.com
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: external-secrets-repo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.external-secrets.io

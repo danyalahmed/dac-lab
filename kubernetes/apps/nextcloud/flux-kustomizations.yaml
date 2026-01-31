@@ -5,10 +5,16 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  retryInterval: 1m
   prune: true
   wait: true
   timeout: 5m
+  force: false
   sourceRef:
     kind: GitRepository
     name: dac-lab-private-repo
   path: ./kubernetes/apps/nextcloud
+  dependsOn:
+    - name: istio-gatewayapi
+    - name: istio-mesh
+    - name: istio-defaultgateway

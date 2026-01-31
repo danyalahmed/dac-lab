@@ -1,0 +1,27 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets-operator
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 1m
+  prune: true
+  wait: true
+  timeout: 5m
+  force: false
+  sourceRef:
+    kind: GitRepository
+    name: dac-lab-repo
+  path: ./kubernetes/infrastructure/external-secrets
+  dependsOn:
+    - name: vault
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: external-secrets
+      namespace: external-secrets-operator
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: external-secrets-webhook
+      namespace: external-secrets-operator

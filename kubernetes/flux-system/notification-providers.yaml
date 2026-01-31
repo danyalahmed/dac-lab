@@ -1,0 +1,38 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: slack
+  namespace: flux-system
+spec:
+  type: slack
+  channel: flux-alerts
+  # Configure the secretRef to point to a secret containing the Slack webhook URL
+  # Create the secret with: kubectl create secret generic slack-webhook --from-literal=address=<webhook-url> -n flux-system
+  secretRef:
+    name: slack-webhook
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: discord
+  namespace: flux-system
+spec:
+  type: discord
+  channel: flux-alerts
+  # Configure the secretRef to point to a secret containing the Discord webhook URL
+  # Create the secret with: kubectl create secret generic discord-webhook --from-literal=address=<webhook-url> -n flux-system
+  secretRef:
+    name: discord-webhook
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: generic-webhook
+  namespace: flux-system
+spec:
+  type: generic
+  # Configure the secretRef to point to a secret containing the generic webhook URL
+  # Create the secret with: kubectl create secret generic generic-webhook --from-literal=address=<webhook-url> -n flux-system
+  secretRef:
+    name: generic-webhook

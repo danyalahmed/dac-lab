@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cert-manager
+  name: cloudnative-pg-operator
   namespace: flux-system
 spec:
   interval: 10m
@@ -13,29 +13,17 @@ spec:
   sourceRef:
     kind: GitRepository
     name: dac-lab-repo
-  path: ./kubernetes/infrastructure/cert-manager/operator
-  decryption:
-    provider: sops
-    secretRef:
-      name: secrets-decryption-key
+  path: ./kubernetes/infrastructure/cloudnative-pg/operator
   healthChecks:
     - apiVersion: apps/v1
       kind: Deployment
-      name: cert-manager
-      namespace: cert-manager
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cert-manager-webhook
-      namespace: cert-manager
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cert-manager-cainjector
-      namespace: cert-manager
+      name: cnpg-controller-manager
+      namespace: cnpg-system
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: issuers-and-certs
+  name: cloudnative-pg-barman
   namespace: flux-system
 spec:
   interval: 10m
@@ -46,7 +34,7 @@ spec:
   force: false
   sourceRef:
     kind: GitRepository
-    name: dac-lab-private-repo
-  path: ./kubernetes/infrastructure/certs
+    name: dac-lab-repo
+  path: ./kubernetes/infrastructure/cloudnative-pg/barman
   dependsOn:
-    - name: cert-manager
+    - name: cloudnative-pg-operator
