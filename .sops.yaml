@@ -1,0 +1,14 @@
+creation_rules:
+# Rule 1: For any file ending in .secrets.yaml, encrypt only the secret data
+  - path_regex: .*\.secrets\.yaml$
+    encrypted_regex: '^(data|stringData)$'
+    age: age17hlsg697wk7ltgxtphjzw2msa5jzgnn0f9mef66w8drpvgz6kdcqgnw8a4
+
+# Rule 2: For HelmRelease files, only encrypt the 'values' key
+  - path_regex: .*helmrelease\.yaml$
+    encrypted_regex: '^(values)$'
+    age: age17hlsg697wk7ltgxtphjzw2msa5jzgnn0f9mef66w8drpvgz6kdcqgnw8a4
+# Rule 3: For ipaddresspool file, encrypt ip address ranges
+  - path_regex: .*ipaddresspool\.yaml$
+    encrypted_regex: '^(spec)$'
+    age: age17hlsg697wk7ltgxtphjzw2msa5jzgnn0f9mef66w8drpvgz6kdcqgnw8a4

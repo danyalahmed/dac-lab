@@ -1,0 +1,52 @@
+{
+    "identities": [
+        {
+            "name": "admin",
+            "credentials": [
+                {
+                    "accessKey": "455302a71fc6c2634c791141281f406a6e41ede1f4fd4b104ab82466bf8526f5",
+                    "secretKey": "4d5f7c8c75d88ae7a3c7d5f32d900358af14595c214b0e4b80c9fcbab374d911"
+                }
+            ],
+            "actions": [
+                "Admin"
+            ]
+        },
+        {
+            "name": "seaweedfs-metadata-backup",
+            "credentials": [
+                {
+                    "accessKey": "pg-backup",
+                    "secretKey": "4d5f7c8c75d88ae7a3c7d5f32d900358af14595c214b0e4b80c9fcbab374d911"
+                }
+            ],
+            "actions": [
+                "Read",
+                "Write",
+                "List",
+                "Tagging"
+            ],
+            "buckets": [
+                "seaweedfs-metadata-backups"
+            ]
+        },
+        {
+            "name": "vault",
+            "credentials": [
+                {
+                    "accessKey": "vault",
+                    "secretKey": "678328606fce7ce8f04d2131c24c4530b70ae17ec61301420401caef024f7eb6"
+                }
+            ],
+            "actions": [
+                "Read",
+                "Write",
+                "List",
+                "Delete"
+            ],
+            "buckets": [
+                "vault-backend"
+            ]
+        }
+    ]
+}

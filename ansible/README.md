@@ -1,13 +1,12 @@
 # Kubernetes Cluster Ansible Automation
 
-This Ansible project automates the deployment and configuration of a Kubernetes cluster with Calico networking, ArgoCD GitOps, and supporting infrastructure.
+This Ansible project automates the deployment and configuration of a Kubernetes cluster with Calico networking and supporting infrastructure.
 
 ## Architecture
 
 - **Control Plane**: Single node running Kubernetes API server, etcd, and control plane components
 - **Workers**: Multiple worker nodes for running workloads
 - **Networking**: Calico CNI with VXLAN overlay
-- **GitOps**: ArgoCD for application deployment
 - **Service Mesh**: Istio in ambient mode
 
 ## Prerequisites
@@ -15,7 +14,7 @@ This Ansible project automates the deployment and configuration of a Kubernetes 
 ### Control Machine
 - Ansible 2.15+ 
 - Python 3.8+
-- kubectl (for ArgoCD installation)
+- kubectl (for Kubernetes operations)
 - helm 3+ (for CSR approver)
 
 ### Target Nodes
@@ -67,9 +66,8 @@ The playbook consists of several phases executed in order:
    - Storage configuration
 
 2. **Bootstrap Phase** (`--tags bootstrap`)
-   - ArgoCD installation
    - Secret creation
-   - GitOps repository configuration
+   - Namespace configuration
 
 3. **Final Configuration** (`--tags final`)
    - DNS configuration
@@ -129,11 +127,8 @@ Expands logical volumes on worker nodes:
 Installs Day 0 applications:
 - Namespace creation
 - Secret management
-- ArgoCD installation
-- Git repository configuration
-- Root application deployment
 
-**Tags**: `kubernetes`, `argocd`, `secrets`, `bootstrap`
+**Tags**: `kubernetes`, `secrets`, `bootstrap`
 
 ### final-touches
 Final system configuration:
@@ -153,9 +148,6 @@ ansible-playbook site.yaml --tags firewall
 
 # Initialize control plane without networking
 ansible-playbook site.yaml --tags init --skip-tags calico
-
-# Install only ArgoCD
-ansible-playbook site.yaml --tags argocd
 
 # Update DNS configuration
 ansible-playbook site.yaml --tags dns
@@ -184,7 +176,6 @@ ansible-playbook site.yaml --tags "kubernetes,networking"
 - `containerd` - Container runtime
 - `calico` - CNI networking
 - `istio` - Service mesh
-- `argocd` - GitOps tooling
 - `vault` - Secret management
 - `seaweedfs` - S3-compatible storage
 
@@ -206,7 +197,6 @@ pod_network_cidr: "10.240.0.0/16"
 
 **Component Versions** (`group_vars/all/main.yaml`):
 ```yaml
-argocd_version: "v3.2.3"
 calico_version: "v3.31.3"
 kubelet_csr_approver_version: "1.2.12"
 ```
@@ -260,13 +250,6 @@ ansible all -m setup
 ```bash
 ansible-playbook site.yaml --tags firewall
 ```
-
-### Update ArgoCD
-1. Update version in `group_vars/all/main.yaml`
-2. Run bootstrap:
-   ```bash
-   ansible-playbook site.yaml --tags argocd
-   ```
 
 ## Directory Structure
 

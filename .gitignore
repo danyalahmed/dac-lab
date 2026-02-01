@@ -36,3 +36,5 @@ __pycache__/
 # Kubernetes generated files (if any)
 # Add specific patterns if needed
 
+kubernetes/infrastructure/metallb/config/ipaddresspool.yaml
+*.secrets.yaml
