@@ -16,7 +16,7 @@ spec:
         namespace: flux-system
       interval: 1h
   valuesFrom:
-    - kind: GitRepository
-      name: dac-lab-private-repo
-      valuesKey: kubernetes/infra/nfs-csi-driver/values.yaml
-      optional: true
+    - kind: ConfigMap
+      name: nfs-csi-driver-helm-values
+      valuesKey: values.yaml
+      optional: false

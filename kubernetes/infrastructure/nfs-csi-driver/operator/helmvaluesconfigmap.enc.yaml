@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: nfs-csi-driver-helm-values
+    namespace: shared-services
+data:
+    values.yaml: ENC[AES256_GCM,data:ThYOfsUgN38XVhQoAeOob/AW2lHC+roHTVSuwBkARx0HsZVhN/j8eXZ8UTJ3ALcZ3/vomqFK2OGmF2816W59VWU/2oaN3NZJ8Nso/h6aLGXbL3q34OD05lVph3vBcRumMItvrSXegXbNmJHimfSHjE3+jw/J2rc9QLg5+lkd9idoSoq/aoNvx6HF37ovDh+i8fGfi8dpHiOfBiX3PIRk1ahAMqHm5wB/hW/YCwsB5iN5DPI/a51pkBez3AP0oQyo0Ur6IhkfJr8uz1ncn2xsDmlOeDZdLhpVoI8Y9SmerbnsEY8lpv/W5rB8FPAZ3VE2kXY2ab+SM1epj9bQrnKfw9uf4N+S7BsTtv99KVKW9RGW6tZXObB2SVS+/uUj7DK7weWqXJ+xClCHmj8oFL9vjLnH4pVC,iv:buGQXAA9hVR1AEQSDKJZpZXypC5eahbieeWiUARGIhw=,tag:TU+JJeZADLkO5BsSeGnPxg==,type:str]
+sops:
+    age:
+        - recipient: age17hlsg697wk7ltgxtphjzw2msa5jzgnn0f9mef66w8drpvgz6kdcqgnw8a4
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB4bER2aGxRZGtkWXNuUFl1
+            Sm1Db0ZCa2tzakFaSU0wQUxiTk9BWWpKSW5JCkpTWmVkbHJJWStONU9HMUZIYlhk
+            RGNicGF6MDJiSXhnNWJBdXkxb3pSQ2cKLS0tIE1LVnJ1bVVLVkl2cTRXZ2huZ1hY
+            OFVDK2ptQWtPVzBsSUhRMFZkY1BzSDQKZj/kji3irHo0tw+jeWFefTjrgnqrd1jd
+            BkCgljeoNI3nzehkUK+OZP0zMQfp3B7Mdv0GX9b74QHbpaC+zZ+jhg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-02-01T14:15:33Z"
+    mac: ENC[AES256_GCM,data:6bPndHJBgV8kzfZLrhGen6dVFIZYxhcWDO9I5VoohpTpIPE4anAng+UVibZ51LEoFgx7D8xdln1LVhO5loeHQLsXon4NzC/hcLsxSYI4FjelXJVo0A8+SLdOIOQ0h4/NT4HTB/PBWBWcFcMZyAD8XWG3Vz+HOaE6K71GTlkkvl8=,iv:+eX7xW7qrugTni3gn6tkozU7oFXM5SM6n9Gvf88GjqA=,tag:Wds8ryD097sbA3jhrnRL6A==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

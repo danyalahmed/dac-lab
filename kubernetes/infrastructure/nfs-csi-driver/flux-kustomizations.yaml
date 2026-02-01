@@ -14,6 +14,11 @@ spec:
     kind: GitRepository
     name: dac-lab-repo
   path: ./kubernetes/infrastructure/nfs-csi-driver/operator
+  decryption:
+    provider: sops
+    secretRef:
+      name: secrets-decryption-key
+
   healthChecks:
     - apiVersion: apps/v1
       kind: DaemonSet
